@@ -1,0 +1,1799 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mes Quêtes</title>
+<meta name="description" content="Quêtes quotidiennes façon jeu de rôle : apprendre, bouger, lire, prier… et monter de niveau.">
+<meta name="theme-color" content="#12131C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quêtes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Concept : un « livre de quêtes » nocturne, une colonne de téléphone, l'or réservé à la progression. */
+:root {
+  --bg: #12131C;
+  --bg-haut: #1D1B2E;
+  --carte: #1C1E2B;
+  --carte-2: #23202F;
+  --releve: #262338;
+  --bord: #2C2F42;
+  --bord-fort: #3A3D52;
+  --texte: #EDEEF4;
+  --doux: #A7ACBF;
+  --pale: #8F94A8;
+  --eteint: #5A5E78;
+  --or: #E3B34C;
+  --or-fonce: #B9842C;
+  --or-clair: #F2CD7A;
+  --sur-or: #12131C;
+  --flamme: #F6B48C;
+  --rouge: #FF8A80;
+  --rouge-f: #4A2A2E;
+  --force: #FF9F7A;  --force-f: #3A2620;
+  --savoir: #8CC4FF; --savoir-f: #1F2D40;
+  --esprit: #C7B6FF; --esprit-f: #2A2540;
+  --vitalite: #7FDCCB; --vitalite-f: #1B3236;
+  --discipline: #F2A7C3; --discipline-f: #3A2232;
+  --f-titre: "Cinzel", "Trajan Pro", Georgia, serif;
+  --f-texte: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sat: 0px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--bg); color: var(--texte); }
+body { margin: 0; font-family: var(--f-texte); font-size: 15px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--or); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--f-titre); text-wrap: balance; margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+.app { max-width: 480px; margin: 0 auto; min-height: 100%; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.gouttiere { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.vue { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- en-tête du héros ---------- */
+.entete { background: linear-gradient(180deg, var(--bg-haut) 0%, var(--bg) 100%); padding-top: calc(var(--sat) + 22px); padding-bottom: 6px; display: flex; flex-direction: column; gap: 16px; }
+.ligne-heros { display: flex; align-items: center; gap: 14px; }
+.blason { width: 64px; height: 64px; border-radius: 18px; background: var(--releve); border: 2px solid var(--or); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; }
+.blason small { font-size: 10px; letter-spacing: .12em; color: #C9CCDA; text-transform: uppercase; }
+.blason b { font-family: var(--f-titre); font-size: 26px; line-height: 1; color: var(--or); }
+.qui { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.qui span { font-size: 13px; color: var(--doux); }
+.qui h1 { font-size: 21px; letter-spacing: .02em; }
+.pastille-serie { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 10px; border-radius: 14px; background: var(--releve); color: var(--flamme); font-size: 12px; font-weight: 700; border: 0; }
+.xp { display: flex; flex-direction: column; gap: 6px; }
+.xp-haut { display: flex; justify-content: space-between; font-size: 12px; color: var(--doux); }
+.xp-haut strong { color: var(--texte); }
+.barre { height: 10px; border-radius: 6px; background: var(--releve); overflow: hidden; }
+.barre i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--or-fonce), var(--or)); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.xp-bas { font-size: 12px; color: var(--doux); }
+
+/* ---------- quêtes ---------- */
+.titre-section { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.titre-section h2 { font-size: 19px; letter-spacing: .04em; }
+.titre-section span { font-size: 13px; color: var(--doux); }
+.titre-section span strong { color: var(--or); }
+.moment { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--pale); margin: 6px 0 -4px 2px; }
+.liste { display: flex; flex-direction: column; gap: 8px; }
+.quete { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: var(--carte); border: 1px solid var(--bord); position: relative; transition: transform .15s ease, border-color .2s; }
+.quete.rare { background: var(--carte-2); border-color: var(--or); }
+.quete.epique { background: var(--carte-2); border-color: var(--esprit); }
+.quete:active { transform: scale(.985); }
+.tuile { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+.corps { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; border: 0; background: none; padding: 0; text-align: left; }
+.nom { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.detail { font-size: 12px; color: var(--doux); }
+.fait .nom { color: var(--doux); text-decoration: line-through; }
+.fait .detail, .fait .gain { color: var(--pale); }
+.tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--sur-or); background: var(--or); padding: 2px 6px; border-radius: 6px; text-decoration: none; display: inline-block; }
+.tag.epique { background: var(--esprit); }
+.gain { font-size: 13px; font-weight: 700; color: var(--or); white-space: nowrap; }
+.coche { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--eteint); background: transparent; padding: 0; flex: none; display: flex; align-items: center; justify-content: center; }
+.fait .coche, .coche[aria-pressed=true] { background: var(--or); border-color: var(--or); }
+.compteur { display: flex; align-items: center; gap: 4px; flex: none; }
+.compteur button { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--bord-fort); background: var(--releve); display: flex; align-items: center; justify-content: center; padding: 0; }
+.compteur output { min-width: 46px; text-align: center; font-size: 13px; font-weight: 700; }
+.mini { height: 4px; border-radius: 3px; background: var(--releve); margin-top: 5px; overflow: hidden; }
+.mini i { display: block; height: 100%; background: var(--or); border-radius: 3px; transition: width .3s; }
+
+.surprise { border: 1px dashed var(--or); background: var(--carte); }
+.surprise .etiquette { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--or); }
+.lien-bouton { border: 0; background: none; color: var(--doux); font-size: 12px; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+
+.coffre { padding: 14px; border-radius: 16px; background: var(--releve); display: flex; align-items: center; gap: 12px; }
+.coffre .txt { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.coffre .txt b { font-size: 14px; }
+.coffre .txt span { font-size: 12px; color: var(--doux); }
+.coffre.pret { border: 1px solid var(--or); animation: lueur 2.4s ease-in-out infinite; }
+@keyframes lueur { 50% { box-shadow: 0 0 22px rgba(227, 179, 76, .35); } }
+.btn-or { border: 0; border-radius: 12px; background: var(--or); color: var(--sur-or); font-weight: 700; padding: 10px 14px; min-height: 44px; }
+.btn { border: 1px solid var(--bord-fort); border-radius: 12px; background: var(--releve); color: var(--texte); font-weight: 600; padding: 10px 14px; min-height: 44px; }
+.btn.danger { color: var(--rouge); border-color: #5A3036; }
+.vide { padding: 28px 18px; border-radius: 16px; border: 1px dashed var(--bord-fort); text-align: center; color: var(--doux); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+/* ---------- héros ---------- */
+.portrait { padding-top: calc(var(--sat) + 26px); padding-bottom: 6px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: radial-gradient(circle at 50% 30%, #2B2545 0%, var(--bg) 70%); text-align: center; }
+.embleme { width: 104px; height: 104px; border-radius: 50%; border: 3px solid var(--or); background: var(--carte); display: flex; align-items: center; justify-content: center; position: relative; }
+.embleme b { position: absolute; bottom: -10px; font-family: var(--f-titre); font-size: 14px; background: var(--or); color: var(--sur-or); border-radius: 10px; padding: 2px 10px; }
+.portrait h1 { font-size: 24px; margin-top: 8px; }
+.portrait .sous { font-size: 13px; color: var(--doux); }
+.pilules { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.pilule { font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 10px; background: var(--releve); }
+h2.or { font-size: 16px; letter-spacing: .05em; color: var(--or); }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stat { padding: 12px; border-radius: 14px; background: var(--carte); border: 1px solid var(--bord); display: flex; flex-direction: column; gap: 8px; }
+.stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.stat .h { display: flex; justify-content: space-between; align-items: baseline; }
+.stat .h span { font-size: 13px; font-weight: 600; }
+.stat .h b { font-family: var(--f-titre); font-size: 20px; }
+.stat .b { height: 6px; border-radius: 4px; background: var(--bord); overflow: hidden; }
+.stat .b i { display: block; height: 100%; border-radius: 4px; }
+.stat small { font-size: 11px; color: var(--doux); }
+.badges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.badge { padding: 12px 6px; border-radius: 14px; background: var(--carte); border: 1px solid #4A3F24; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.badge b { font-size: 11px; font-weight: 600; }
+.badge small { font-size: 10px; color: var(--doux); }
+.badge.verrou { background: #171822; border: 1px dashed var(--bord-fort); }
+.badge.verrou b { color: var(--doux); }
+.badge.verrou small { color: var(--pale); }
+.carte { padding: 14px; border-radius: 16px; background: var(--carte); border: 1px solid var(--bord); display: flex; flex-direction: column; gap: 10px; }
+.carte .h { display: flex; justify-content: space-between; font-size: 13px; }
+.carte .h span { color: var(--doux); }
+.semaine { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; height: 64px; }
+.semaine i { display: block; border-radius: 4px; background: var(--or); min-height: 3px; }
+.semaine i.futur { background: var(--releve); }
+.jours7 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; font-size: 10px; color: var(--doux); text-align: center; }
+.chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; text-align: center; }
+.chiffres b { display: block; font-family: var(--f-titre); font-size: 20px; color: var(--or); }
+.chiffres span { font-size: 11px; color: var(--doux); }
+
+/* ---------- journal ---------- */
+.mois { display: flex; align-items: center; justify-content: space-between; padding-top: calc(var(--sat) + 22px); }
+.mois h1 { font-size: 22px; text-transform: capitalize; }
+.rond { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--bord-fort); background: var(--releve); display: flex; align-items: center; justify-content: center; padding: 0; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal .jsem { font-size: 11px; color: var(--pale); text-align: center; padding-bottom: 4px; }
+.jour { aspect-ratio: 1; max-width: 100%; border: 0; background: none; padding: 0; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.jour svg { position: absolute; inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); }
+.jour span { position: relative; font-size: 13px; font-weight: 600; }
+.jour.hors span { color: var(--eteint); }
+.jour.auj span { color: var(--or); }
+.jour.sel { background: var(--releve); }
+.jour.parfait span { color: var(--sur-or); }
+.jour:disabled { cursor: default; }
+.puces { display: flex; gap: 6px; flex-wrap: wrap; }
+.puce { border: 1px solid var(--bord-fort); background: transparent; border-radius: 999px; padding: 7px 12px; font-size: 13px; color: var(--doux); min-height: 36px; }
+.puce.on { background: var(--or); border-color: var(--or); color: var(--sur-or); font-weight: 700; }
+textarea { width: 100%; min-height: 96px; resize: vertical; border-radius: 12px; border: 1px solid var(--bord-fort); background: var(--bg); padding: 10px 12px; font-size: 16px; line-height: 1.45; }
+.ligne-jour { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--bord); font-size: 14px; }
+.ligne-jour:first-child { border-top: 0; }
+.ligne-jour .n { flex: 1; min-width: 0; }
+.ligne-jour .x { color: var(--doux); font-size: 12px; }
+
+/* ---------- réglages ---------- */
+.page-titre { padding-top: calc(var(--sat) + 22px); font-size: 24px; }
+.champ { display: flex; flex-direction: column; gap: 6px; }
+.champ label, .champ .lab { font-size: 12px; font-weight: 600; color: var(--doux); letter-spacing: .02em; }
+input[type=text], input[type=number], select { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--bord-fort); background: var(--bg); padding: 8px 12px; font-size: 16px; }
+.reglage { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--bord); }
+.reglage:first-of-type { border-top: 0; }
+.reglage .t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.reglage .t span { font-size: 12px; color: var(--doux); }
+.reglage select { width: auto; }
+.interrupteur { width: 52px; height: 32px; border-radius: 16px; border: 0; background: var(--eteint); position: relative; padding: 0; flex: none; transition: background .2s; }
+.interrupteur::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; transition: transform .2s; }
+.interrupteur[aria-checked=true] { background: var(--or); }
+.interrupteur[aria-checked=true]::after { transform: translateX(20px); }
+.q-ligne { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--bord); }
+.q-ligne:first-child { border-top: 0; }
+.q-ligne .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.q-ligne .t b { font-size: 14px; font-weight: 600; }
+.q-ligne .t span { font-size: 12px; color: var(--doux); }
+.q-ligne.inactive { opacity: .55; }
+.icone-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--bord-fort); background: var(--releve); display: flex; align-items: center; justify-content: center; padding: 0; flex: none; }
+.icone-btn:disabled { opacity: .35; }
+.rangee { display: flex; gap: 8px; flex-wrap: wrap; }
+.note { font-size: 13px; color: var(--doux); line-height: 1.5; }
+.note ol { margin: 6px 0 0; padding-left: 20px; }
+code.bloc-code { display: block; max-height: 120px; overflow: auto; font-size: 11px; background: var(--bg); border: 1px solid var(--bord); border-radius: 10px; padding: 8px; word-break: break-all; }
+
+/* ---------- feuille de saisie ---------- */
+.voile { position: fixed; inset: 0; background: rgba(5, 6, 12, .72); z-index: 40; display: flex; align-items: flex-end; justify-content: center; animation: fondu .2s ease; }
+.feuille { width: 100%; max-width: 480px; max-height: 92%; overflow-y: auto; background: var(--carte); border-radius: 22px 22px 0 0; border-top: 1px solid var(--bord-fort); padding-top: 18px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; animation: monte .25s cubic-bezier(.2,.8,.2,1); }
+.feuille h2 { font-size: 19px; }
+.grille-icones { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.grille-icones button { aspect-ratio: 1; max-width: 100%; border-radius: 12px; border: 1px solid var(--bord-fort); background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 0; }
+.grille-icones button.on { border-color: var(--or); background: var(--releve); }
+.deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@keyframes fondu { from { opacity: 0; } }
+@keyframes monte { from { transform: translateY(40px); opacity: 0; } }
+
+/* ---------- navigation ---------- */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #161722; border-top: 1px solid #262838; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.nav .interne { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding-top: 8px; padding-bottom: 8px; }
+.nav button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--doux); font-size: 11px; font-weight: 600; padding: 6px 0; min-height: 52px; }
+.nav button[aria-current=page] { color: var(--or); }
+
+/* ---------- célébrations ---------- */
+.flotte { position: fixed; z-index: 60; pointer-events: none; font-family: var(--f-titre); font-weight: 700; font-size: 18px; color: var(--or); text-shadow: 0 2px 8px rgba(0,0,0,.6); white-space: nowrap; animation: flotte 1.1s ease-out forwards; }
+@keyframes flotte { from { transform: translate(-50%, 0) scale(.8); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -8px) scale(1.1); } to { transform: translate(-50%, -60px) scale(1); opacity: 0; } }
+.toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%); z-index: 70; background: var(--releve); border: 1px solid var(--or); border-radius: 14px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; width: min(420px, calc(100% - 32px)); box-shadow: 0 10px 30px rgba(0,0,0,.5); animation: toast 3.6s ease forwards; }
+.toast b { display: block; font-size: 13px; color: var(--or); }
+.toast span { font-size: 12px; color: var(--doux); }
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, -16px); } 8%, 88% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -16px); } }
+.celebration { position: fixed; inset: 0; z-index: 80; background: radial-gradient(circle at 50% 45%, rgba(43,37,69,.96) 0%, rgba(10,10,16,.97) 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px; animation: fondu .3s ease; overflow: hidden; }
+.celebration .grand { font-family: var(--f-titre); font-size: 52px; color: var(--or); line-height: 1; animation: pop .6s cubic-bezier(.2,1.6,.4,1); }
+.celebration .moyen { font-family: var(--f-titre); font-size: 22px; }
+.celebration p { margin: 0; color: var(--doux); max-width: 300px; }
+.celebration .rayons { position: absolute; width: 520px; height: 520px; left: 50%; top: 45%; margin: -260px 0 0 -260px; background: repeating-conic-gradient(rgba(227,179,76,.10) 0 10deg, transparent 10deg 20deg); border-radius: 50%; animation: tourne 18s linear infinite; pointer-events: none; }
+.celebration > *:not(.rayons):not(.etincelle) { position: relative; }
+.etincelle { position: absolute; width: 8px; height: 8px; border-radius: 2px; top: 45%; left: 50%; animation: eclat 1.4s cubic-bezier(.1,.8,.3,1) forwards; pointer-events: none; }
+@keyframes pop { from { transform: scale(.3); opacity: 0; } }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@keyframes eclat { from { transform: translate(0, 0) rotate(0); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(540deg); opacity: 0; } }
+.coffre-anim { animation: secoue .6s ease 2; }
+@keyframes secoue { 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+
+/* ---------- version 2 : protection du niveau ---------- */
+.garde { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 10px; border-radius: 14px; background: var(--releve); color: var(--rouge); font-size: 12px; font-weight: 700; border: 1px solid #5A3036; flex: none; }
+.garde.ok { color: var(--vitalite); border-color: #2C4F4A; }
+.enjeu { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: #2A1C22; border: 1px solid #5A3036; font-size: 13px; color: #F3C9C4; }
+.enjeu b { color: var(--rouge); }
+.enjeu.ok { background: #172A2A; border-color: #2C4F4A; color: #BFE9E0; }
+.enjeu svg { flex: none; }
+.regle { flex-direction: row; align-items: flex-start; gap: 12px; }
+.regle svg { flex: none; margin-top: 2px; }
+.regle p { margin: 0; font-size: 13px; color: var(--doux); line-height: 1.5; }
+.semaine i.rate { background: var(--rouge); opacity: .7; }
+.jour.penal::after { content: ""; position: absolute; right: 12%; top: 10%; width: 7px; height: 7px; border-radius: 50%; background: var(--rouge); }
+.legende { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: -6px 0 0; font-size: 12px; }
+.pt { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-left: 6px; }
+.pt.or { background: var(--or); } .pt.rouge { background: var(--rouge); }
+.note.alerte { display: flex; gap: 6px; align-items: center; color: #F3C9C4; margin: 0; }
+.coche.petite { width: 28px; height: 28px; }
+.coche.petite.on { background: var(--or); border-color: var(--or); }
+span.coche.petite { opacity: .8; }
+.compteur button.plein { background: var(--or); border-color: var(--or); color: var(--sur-or); }
+.celebration.defaite { background: radial-gradient(circle at 50% 45%, rgba(70,28,34,.96) 0%, rgba(10,10,16,.97) 70%); }
+.celebration.defaite .grand { color: var(--rouge); }
+.chute { animation: chute .8s cubic-bezier(.3,1.4,.5,1); }
+@keyframes chute { from { transform: translateY(-50px) rotate(-12deg); opacity: 0; } }
+
+/* ---------- version 2 : propositions ---------- */
+.proposition { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--or); }
+.btn-mini { border: 1px solid var(--or); border-radius: 10px; background: transparent; color: var(--or); font-weight: 700; font-size: 12px; padding: 6px 10px; min-height: 34px; flex: none; display: inline-flex; align-items: center; gap: 4px; }
+.feuille.grande { max-height: 94%; }
+.tete-feuille { display: flex; align-items: center; gap: 12px; position: sticky; top: -18px; margin-top: -18px; padding: 18px 0 10px; background: var(--carte); z-index: 2; border-bottom: 1px solid var(--bord); }
+.tete-feuille .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tete-feuille .t span { font-size: 12px; color: var(--doux); }
+.minuteur { position: sticky; top: 60px; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--releve); border: 1px solid var(--or); }
+.minuteur[hidden] { display: none; }
+.minuteur b { font-family: var(--f-titre); font-size: 30px; color: var(--or); line-height: 1; }
+.minuteur span { flex: 1; font-size: 13px; color: var(--doux); }
+.minuteur .btn { min-height: 36px; padding: 6px 12px; }
+.bloc { padding: 12px 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--bord); display: flex; flex-direction: column; gap: 6px; }
+.bloc h3 { font-size: 13px; letter-spacing: .06em; color: var(--or); }
+.bloc p { margin: 0; font-size: 15px; line-height: 1.6; }
+.bloc.fort { border-color: #4A3F24; background: #1A1822; }
+.bloc.parole p { font-style: italic; font-size: 16px; }
+.bloc.parole small { color: var(--doux); font-size: 12px; text-align: right; }
+.bloc details summary { font-size: 13px; color: var(--doux); cursor: pointer; }
+.bloc details p { margin-top: 6px; }
+.etapes { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; }
+.liste-simple { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.liste-simple li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--bord); font-size: 14px; }
+.liste-simple li:first-child { border-top: 0; }
+.liste-simple b { color: var(--doux); font-weight: 600; white-space: nowrap; }
+.btn-or.large, .btn.large { width: 100%; min-height: 50px; font-size: 15px; }
+.bandeau-ok { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; background: #172A2A; border: 1px solid #2C4F4A; color: #BFE9E0; font-weight: 600; }
+.exo { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: 1px solid var(--bord); }
+.exo:first-of-type { border-top: 0; }
+.exo-t { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.exo-t span { color: var(--or); font-weight: 700; font-size: 13px; white-space: nowrap; }
+.exo p { font-size: 13px; color: var(--doux); line-height: 1.45; }
+.exo-b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tour { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--eteint); background: transparent; font-weight: 700; color: var(--doux); padding: 0; }
+.tour.on { background: var(--or); border-color: var(--or); color: var(--sur-or); }
+.mysteres { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--doux); }
+.mysteres li.actuel { color: var(--or); font-weight: 700; }
+.mysteres li.fini { text-decoration: line-through; color: var(--pale); }
+.grain { align-self: center; flex: none; width: 176px; height: 176px; padding: 0; border-radius: 50%; border: 3px solid var(--or); background: radial-gradient(circle at 50% 40%, #2B2545, var(--carte)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--texte); }
+.grain:active { transform: scale(.96); }
+.grain span { font-family: var(--f-titre); font-size: 48px; color: var(--or); line-height: 1; }
+.grain small { font-size: 18px; color: var(--doux); }
+.grain em { font-style: normal; font-size: 13px; color: var(--doux); }
+.grains { display: flex; justify-content: center; gap: 8px; }
+.grains i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--eteint); }
+.grains i.on { background: var(--or); border-color: var(--or); }
+.grand-compteur { justify-content: center; gap: 14px; }
+.grand-compteur button { width: 48px; height: 48px; border-radius: 14px; }
+.grand-compteur output { font-size: 17px; min-width: 120px; }
+.progres-lecon { display: flex; align-items: center; gap: 6px; }
+.progres-lecon i { flex: 1; max-width: 60px; height: 8px; border-radius: 4px; background: var(--releve); }
+.progres-lecon i.on { background: var(--or); }
+.progres-lecon span { margin-left: auto; font-size: 12px; color: var(--doux); }
+.matiere { display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--savoir); background: var(--savoir-f); padding: 3px 8px; border-radius: 8px; }
+.bloc.lecon h3 { font-size: 17px; color: var(--texte); letter-spacing: .02em; }
+.bloc.question { border-color: var(--or); }
+.bloc.question .q { font-weight: 600; font-size: 16px; }
+.ligne-reponse { display: flex; gap: 8px; margin-top: 4px; }
+.ligne-reponse input { flex: 1; min-width: 0; }
+form .lab { font-size: 12px; font-weight: 600; color: var(--doux); }
+.retour { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.retour.ok { background: #172A2A; color: #BFE9E0; }
+.retour.ko { background: #2A1C22; color: #F3C9C4; }
+.retour b { color: var(--texte); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+:root { --sat: env(safe-area-inset-top, 0px); }
+</style>
+</head>
+<body>
+<main id="app" class="app"></main>
+<nav id="nav" class="nav" aria-label="Navigation principale"></nav>
+<script>
+"use strict";
+/* Mes Quêtes — contenus proposés : prières, chapelet, séances d'exercices, course, leçons, lectures. */
+
+// ================================================================== PRIÈRES (tradition catholique)
+const P = {
+  signe: "Au nom du Père, et du Fils, et du Saint-Esprit. Amen.",
+  notrePere: "Notre Père, qui es aux cieux, que ton nom soit sanctifié, que ton règne vienne, que ta volonté soit faite sur la terre comme au ciel. Donne-nous aujourd'hui notre pain de ce jour. Pardonne-nous nos offenses, comme nous pardonnons aussi à ceux qui nous ont offensés. Et ne nous laisse pas entrer en tentation, mais délivre-nous du Mal. Amen.",
+  ave: "Je vous salue, Marie, pleine de grâce ; le Seigneur est avec vous. Vous êtes bénie entre toutes les femmes, et Jésus, le fruit de vos entrailles, est béni. Sainte Marie, Mère de Dieu, priez pour nous, pauvres pécheurs, maintenant et à l'heure de notre mort. Amen.",
+  gloire: "Gloire au Père, et au Fils, et au Saint-Esprit, comme il était au commencement, maintenant et toujours, et pour les siècles des siècles. Amen.",
+  credo: "Je crois en Dieu, le Père tout-puissant, créateur du ciel et de la terre. Et en Jésus-Christ, son Fils unique, notre Seigneur, qui a été conçu du Saint-Esprit, est né de la Vierge Marie, a souffert sous Ponce Pilate, a été crucifié, est mort et a été enseveli, est descendu aux enfers, le troisième jour est ressuscité des morts, est monté aux cieux, est assis à la droite de Dieu le Père tout-puissant, d'où il viendra juger les vivants et les morts. Je crois en l'Esprit Saint, à la sainte Église catholique, à la communion des saints, à la rémission des péchés, à la résurrection de la chair, à la vie éternelle. Amen.",
+  offrande: "Mon Dieu, je vous offre toutes les actions de cette journée : faites qu'elles soient toutes selon votre sainte volonté et pour votre plus grande gloire. Amen.",
+  contrition: "Mon Dieu, j'ai un très grand regret de vous avoir offensé, parce que vous êtes infiniment bon, infiniment aimable, et que le péché vous déplaît. Je prends la ferme résolution, avec le secours de votre sainte grâce, de ne plus vous offenser et de faire pénitence. Amen.",
+  remets: "En tes mains, Seigneur, je remets mon esprit. Garde-moi cette nuit sous ta protection, et que je me réveille demain pour te servir. Amen.",
+};
+
+const PRIERES_MATIN = [
+  { titre: "Prière à l'ange gardien", texte: "Ange de Dieu, qui êtes mon gardien, et à qui j'ai été confié par la bonté divine, éclairez-moi, gardez-moi, dirigez-moi et gouvernez-moi. Amen." },
+  { titre: "Viens, Esprit Saint", texte: "Viens, Esprit Saint, remplis le cœur de tes fidèles et allume en eux le feu de ton amour. Envoie ton Esprit et tout sera créé, et tu renouvelleras la face de la terre. Amen." },
+  { titre: "Prière de saint François", texte: "Seigneur, fais de moi un instrument de ta paix. Là où est la haine, que je mette l'amour. Là où est l'offense, que je mette le pardon. Là où est la discorde, que je mette l'union. Là où est l'erreur, que je mette la vérité. Là où est le doute, que je mette la foi. Là où est le désespoir, que je mette l'espérance. Là où sont les ténèbres, que je mette la lumière. Là où est la tristesse, que je mette la joie. Ô Maître, que je ne cherche pas tant à être consolé qu'à consoler, à être compris qu'à comprendre, à être aimé qu'à aimer. Car c'est en se donnant qu'on reçoit, c'est en s'oubliant qu'on se retrouve, c'est en pardonnant qu'on est pardonné, c'est en mourant qu'on ressuscite à l'éternelle vie." },
+  { titre: "Prends, Seigneur (saint Ignace)", texte: "Prends, Seigneur, et reçois toute ma liberté, ma mémoire, mon intelligence et toute ma volonté, tout ce que j'ai et possède. C'est toi qui m'as tout donné : à toi, Seigneur, je le rends. Tout est à toi, disposes-en selon ton entière volonté. Donne-moi ton amour et ta grâce : c'est assez pour moi." },
+  { titre: "Je crois en Dieu", texte: P.credo },
+  { titre: "Que rien ne te trouble (sainte Thérèse d'Avila)", texte: "Que rien ne te trouble, que rien ne t'effraie. Tout passe, Dieu ne change pas. La patience obtient tout. Celui qui possède Dieu ne manque de rien. Dieu seul suffit." },
+  { titre: "L'Angélus", texte: "L'ange du Seigneur apporta l'annonce à Marie, et elle conçut du Saint-Esprit. — Je vous salue Marie…\nVoici la servante du Seigneur : qu'il me soit fait selon votre parole. — Je vous salue Marie…\nEt le Verbe s'est fait chair, et il a habité parmi nous. — Je vous salue Marie…\nPriez pour nous, sainte Mère de Dieu, afin que nous soyons rendus dignes des promesses du Christ.\nPrions : Que ta grâce, Seigneur notre Père, se répande en nos cœurs : par le message de l'ange, tu nous as fait connaître l'incarnation de ton Fils bien-aimé ; conduis-nous, par sa passion et par sa croix, jusqu'à la gloire de la résurrection. Par Jésus, le Christ, notre Seigneur. Amen." },
+  { titre: "Âme du Christ", texte: "Âme du Christ, sanctifie-moi. Corps du Christ, sauve-moi. Sang du Christ, enivre-moi. Eau du côté du Christ, lave-moi. Passion du Christ, fortifie-moi. Ô bon Jésus, exauce-moi. Dans tes blessures, cache-moi. Ne permets pas que je sois séparé de toi. De l'ennemi, défends-moi. À l'heure de ma mort, appelle-moi, et ordonne-moi de venir à toi, pour qu'avec tes saints je te loue, dans les siècles des siècles. Amen." },
+];
+
+const PRIERES_SOIR = [
+  { titre: "Acte de contrition", texte: P.contrition },
+  { titre: "Souvenez-vous (saint Bernard)", texte: "Souvenez-vous, ô très miséricordieuse Vierge Marie, qu'on n'a jamais entendu dire qu'aucun de ceux qui ont eu recours à votre protection, imploré votre assistance ou réclamé vos suffrages, ait été abandonné. Animé d'une pareille confiance, ô Vierge des vierges, ô ma Mère, je cours vers vous, et gémissant sous le poids de mes péchés, je me prosterne à vos pieds. Ô Mère du Verbe incarné, ne méprisez pas mes prières, mais écoutez-les favorablement et daignez les exaucer. Amen." },
+  { titre: "Prière d'abandon (Charles de Foucauld)", texte: "Mon Père, je m'abandonne à toi, fais de moi ce qu'il te plaira. Quoi que tu fasses de moi, je te remercie. Je suis prêt à tout, j'accepte tout. Pourvu que ta volonté se fasse en moi, en toutes tes créatures, je ne désire rien d'autre, mon Dieu. Je remets mon âme entre tes mains. Je te la donne, mon Dieu, avec tout l'amour de mon cœur, parce que je t'aime, et que ce m'est un besoin d'amour de me donner, de me remettre entre tes mains, sans mesure, avec une infinie confiance, car tu es mon Père." },
+  { titre: "Salut, ô Reine (Salve Regina)", texte: "Salut, ô Reine, Mère de miséricorde, notre vie, notre douceur, notre espérance, salut ! Enfants d'Ève, exilés, nous crions vers toi ; vers toi nous soupirons, gémissant et pleurant dans cette vallée de larmes. Ô toi, notre avocate, tourne vers nous ton regard miséricordieux. Et, après cet exil, montre-nous Jésus, le fruit béni de ton sein. Ô clémente, ô miséricordieuse, ô douce Vierge Marie !" },
+  { titre: "Sous l'abri de ta miséricorde", texte: "Sous l'abri de ta miséricorde, nous nous réfugions, sainte Mère de Dieu. Ne méprise pas nos prières quand nous sommes dans l'épreuve, mais de tous les dangers délivre-nous toujours, Vierge glorieuse et bénie." },
+  { titre: "Reste avec nous, Seigneur", texte: "Reste avec nous, Seigneur, car le soir approche et déjà le jour baisse (Luc 24, 29). Merci pour cette journée, pour ses joies et pour ses peines. Pardonne-moi ce qui n'a pas été selon ton cœur, garde ceux que j'aime, et donne le repos à ceux qui souffrent. Amen." },
+];
+
+const INTENTIONS = [
+  "Pour ma famille et ceux que j'aime.", "Pour une personne malade ou qui souffre.", "Pour la paix dans le monde.",
+  "Pour quelqu'un avec qui j'ai du mal à m'entendre.", "Pour les personnes seules.", "Pour mon travail et mes projets de la journée.",
+  "Pour les défunts de ma famille.", "Pour l'Église et pour le pape.", "Pour ceux qui cherchent un sens à leur vie.",
+  "Pour les personnes sans travail ou sans logement.", "Pour mes amis.", "Pour savoir rendre grâce de ce que j'ai reçu.",
+];
+
+const PAROLES = [
+  ["Venez à moi, vous tous qui peinez sous le poids du fardeau, et moi, je vous procurerai le repos.", "Matthieu 11, 28"],
+  ["Le Seigneur est mon berger : je ne manque de rien.", "Psaume 22 (23), 1"],
+  ["Ne crains pas, car je suis avec toi.", "Isaïe 41, 10"],
+  ["Aimez-vous les uns les autres comme je vous ai aimés.", "Jean 15, 12"],
+  ["Demandez, on vous donnera ; cherchez, vous trouverez ; frappez, on vous ouvrira.", "Matthieu 7, 7"],
+  ["Je suis la lumière du monde. Celui qui me suit ne marchera pas dans les ténèbres.", "Jean 8, 12"],
+  ["L'amour prend patience ; l'amour rend service.", "1re lettre aux Corinthiens 13, 4"],
+  ["Heureux les artisans de paix, car ils seront appelés fils de Dieu.", "Matthieu 5, 9"],
+  ["Je puis tout en celui qui me donne la force.", "Lettre aux Philippiens 4, 13"],
+  ["Cherchez d'abord le royaume de Dieu et sa justice, et tout cela vous sera donné par surcroît.", "Matthieu 6, 33"],
+  ["Soyez dans la joie, priez sans relâche, rendez grâce en toute circonstance.", "1re lettre aux Thessaloniciens 5, 16-18"],
+  ["Voici que je suis avec vous tous les jours jusqu'à la fin du monde.", "Matthieu 28, 20"],
+];
+
+const EXAMEN = [
+  "Remercier : pour quoi puis-je dire merci aujourd'hui ? Une rencontre, un moment, une grâce reçue.",
+  "Demander la lumière : « Seigneur, aide-moi à voir ma journée avec ton regard. »",
+  "Relire la journée : où ai-je aimé ? Où ai-je manqué d'amour, de patience, de vérité ?",
+  "Demander pardon pour ce qui n'a pas été juste.",
+  "Regarder demain : quelle résolution concrète, même petite, pour la journée qui vient ?",
+];
+
+const MYSTERES = {
+  joyeux: ["l'Annonciation", "la Visitation", "la Nativité", "la Présentation de Jésus au Temple", "le Recouvrement de Jésus au Temple"],
+  lumineux: ["le Baptême de Jésus", "les Noces de Cana", "l'Annonce du Royaume", "la Transfiguration", "l'Institution de l'Eucharistie"],
+  douloureux: ["l'Agonie à Gethsémani", "la Flagellation", "le Couronnement d'épines", "le Portement de la croix", "la Crucifixion"],
+  glorieux: ["la Résurrection", "l'Ascension", "la Pentecôte", "l'Assomption de Marie", "le Couronnement de Marie"],
+};
+// lundi = 0 … dimanche = 6
+const MYSTERES_DU_JOUR = ["joyeux", "douloureux", "glorieux", "lumineux", "douloureux", "joyeux", "glorieux"];
+
+// ================================================================== EXERCICES (maison, sans matériel, intermédiaire)
+// m : "reps" ou "sec" ; v : valeur ; c : consigne
+const EXOS = {
+  pompes: { nom: "Pompes", m: "reps", v: 12, c: "Mains un peu plus larges que les épaules, corps gainé de la tête aux talons, la poitrine frôle le sol." },
+  pompes_diamant: { nom: "Pompes diamant", m: "reps", v: 8, c: "Mains en losange sous la poitrine, coudes serrés le long du corps." },
+  pompes_declinees: { nom: "Pompes déclinées", m: "reps", v: 10, c: "Pieds posés sur une chaise, mains au sol : on travaille le haut des pectoraux." },
+  pompes_pike: { nom: "Pompes « pike » (épaules)", m: "reps", v: 8, c: "Fesses en l'air, corps en V renversé : plier les coudes pour amener le front vers le sol." },
+  dips: { nom: "Dips sur chaise", m: "reps", v: 12, c: "Mains au bord d'une chaise stable, descendre en pliant les coudes à 90°, dos près de la chaise." },
+  superman: { nom: "Superman", m: "reps", v: 12, c: "Allongé sur le ventre, lever bras et jambes ensemble, tenir 2 secondes, redescendre." },
+  squats: { nom: "Squats", m: "reps", v: 20, c: "Pieds largeur d'épaules, descendre jusqu'aux cuisses parallèles au sol, talons au sol, dos droit." },
+  squats_sautes: { nom: "Squats sautés", m: "reps", v: 12, c: "Squat puis saut explosif ; atterrir en douceur, genoux souples." },
+  fentes: { nom: "Fentes alternées", m: "reps", v: 24, c: "Un grand pas en avant, genou arrière proche du sol, buste droit. 12 par jambe." },
+  fentes_bulgares: { nom: "Fentes bulgares", m: "reps", v: 20, c: "Pied arrière posé sur une chaise, descendre sur la jambe avant. 10 par jambe." },
+  chaise: { nom: "Chaise contre le mur", m: "sec", v: 45, c: "Dos au mur, cuisses parallèles au sol, genoux à 90°." },
+  pont: { nom: "Pont fessier", m: "reps", v: 15, c: "Allongé sur le dos, pieds au sol, monter le bassin en serrant les fessiers, tenir 1 seconde." },
+  mollets: { nom: "Montées sur la pointe des pieds", m: "reps", v: 25, c: "Debout, monter lentement sur la pointe des pieds puis redescendre." },
+  planche: { nom: "Planche (gainage)", m: "sec", v: 45, c: "Sur les avant-bras, corps aligné, ventre et fessiers serrés, sans creuser le dos." },
+  planche_laterale: { nom: "Gainage latéral", m: "sec", v: 30, c: "Sur un avant-bras, corps aligné de profil. 30 secondes de chaque côté." },
+  mountain: { nom: "Mountain climbers", m: "sec", v: 40, c: "En position de pompe, ramener les genoux vers la poitrine en alternance, rapidement." },
+  releves: { nom: "Relevés de jambes", m: "reps", v: 12, c: "Allongé sur le dos, mains sous les fesses, monter les jambes tendues à la verticale sans élan." },
+  banane: { nom: "Gainage « banane »", m: "sec", v: 30, c: "Sur le dos, bas du dos plaqué au sol, épaules et jambes décollées, bras tendus derrière la tête." },
+  velo: { nom: "Crunchs vélo", m: "reps", v: 20, c: "Coude vers le genou opposé, en alternance, sans tirer sur la nuque." },
+  burpees: { nom: "Burpees", m: "reps", v: 10, c: "Accroupi, mains au sol, pieds en arrière, pompe, retour accroupi, saut bras en l'air." },
+  jumping: { nom: "Jumping jacks", m: "sec", v: 45, c: "Sauter en écartant bras et jambes, puis les ramener." },
+  genoux: { nom: "Montées de genoux", m: "sec", v: 40, c: "Course sur place en montant les genoux à hauteur des hanches." },
+  patineur: { nom: "Sauts du patineur", m: "reps", v: 20, c: "Sauts latéraux d'une jambe sur l'autre, comme un patineur de vitesse." },
+};
+const ECHAUFFEMENT = [["Jumping jacks", "1 min"], ["Rotations des bras et des épaules", "30 s"], ["Montées de genoux", "30 s"], ["Squats lents", "10"]];
+const RETOUR_CALME = [["Étirement des quadriceps", "30 s par jambe"], ["Étirement des ischio-jambiers", "30 s par jambe"], ["Étirement des pectoraux contre un mur", "30 s"], ["Posture de l'enfant", "45 s"]];
+// Thème de la séance selon le jour (lundi = 0)
+const SEANCES = [
+  { titre: "Haut du corps", exos: ["pompes", "dips", "pompes_pike", "superman", "pompes_diamant", "pompes_declinees"] },
+  { titre: "Bas du corps", exos: ["squats", "fentes", "pont", "chaise", "mollets", "fentes_bulgares", "squats_sautes"] },
+  { titre: "Gainage", exos: ["planche", "planche_laterale", "releves", "banane", "velo", "mountain", "superman"] },
+  { titre: "Corps entier", exos: ["burpees", "pompes", "squats", "planche", "fentes", "mountain"] },
+  { titre: "Cardio", exos: ["jumping", "burpees", "genoux", "patineur", "mountain", "squats_sautes"] },
+  { titre: "Force (haut et bas)", exos: ["pompes_declinees", "fentes_bulgares", "dips", "pont", "pompes", "chaise"] },
+  { titre: "Gainage et souplesse", exos: ["planche", "pont", "banane", "planche_laterale", "superman"] },
+];
+
+// ================================================================== COURSE (séances de 30 à 40 minutes)
+const COURSES = [
+  { titre: "Footing en endurance", duree: "30 min", etapes: ["30 min à allure facile : tu dois pouvoir parler en courant.", "Finis par 5 min de marche et quelques étirements."] },
+  { titre: "Fractionné 30/30", duree: "35 min", etapes: ["10 min de footing facile pour s'échauffer.", "2 séries de 8 × (30 s rapide + 30 s en trottinant).", "3 min de trot entre les deux séries.", "5 min de retour au calme en trottinant."] },
+  { titre: "Côtes", duree: "35 min", etapes: ["10 min de footing facile jusqu'à une côte.", "8 montées de 45 s à allure soutenue, retour en trottinant dans la descente.", "10 min de footing facile pour rentrer."] },
+  { titre: "Fartlek (jeu d'allures)", duree: "30 min", etapes: ["10 min faciles.", "6 × (1 min vite + 2 min lent), en suivant ses sensations.", "2 min de trot pour finir."] },
+  { titre: "Progressif", duree: "30 min", etapes: ["10 min lentes.", "10 min à allure moyenne.", "10 min à allure soutenue, sans être à fond.", "Marche et étirements."] },
+  { titre: "Pyramide", duree: "35 min", etapes: ["10 min de footing facile.", "Rapide 1 min, 2 min, 3 min, 2 min, 1 min, avec autant de récupération en trottinant après chaque effort.", "8 min de retour au calme."] },
+  { titre: "Marche rapide (récupération active)", duree: "40 min", etapes: ["40 min de marche rapide, bras actifs, respiration ample.", "Idéal après une grosse séance ou en cas de fatigue."] },
+];
+
+// ================================================================== LECTURE
+const LECTURES = [
+  "L'Évangile selon saint Marc : le plus court, à lire en 16 jours, un chapitre par jour.",
+  "« Histoire d'une âme », de sainte Thérèse de Lisieux.",
+  "« Les Confessions », de saint Augustin.",
+  "« L'Imitation de Jésus-Christ » : un court chapitre suffit pour la journée.",
+  "« Les Misérables », de Victor Hugo.",
+  "« Le Comte de Monte-Cristo », d'Alexandre Dumas.",
+  "« Vingt mille lieues sous les mers », de Jules Verne.",
+  "« L'Origine des espèces », de Charles Darwin (version abrégée).",
+  "« Une brève histoire du temps », de Stephen Hawking.",
+  "« Sapiens », de Yuval Noah Harari.",
+  "« Le Seigneur des anneaux », de J. R. R. Tolkien.",
+  "« Les Fiancés », d'Alessandro Manzoni.",
+  "« Cyrano de Bergerac », d'Edmond Rostand.",
+  "« Introduction à la vie dévote », de saint François de Sales.",
+];
+
+// ================================================================== LEÇONS
+// m : matière ; t : titre ; x : leçon ; q : question ; r : réponses acceptées ; tol : tolérance numérique
+const LECONS = [
+  // ---------- culture générale
+  { id: "c1", m: "culture", t: "La prise de la Bastille", x: "Le 14 juillet 1789, les Parisiens prennent la forteresse de la Bastille, symbole de l'arbitraire royal. Cette date marque le début de la Révolution française et devient la fête nationale en 1880.", q: "En quelle année a eu lieu la prise de la Bastille ?", r: ["1789"] },
+  { id: "c2", m: "culture", t: "Charlemagne", x: "Charlemagne, roi des Francs, est couronné empereur à Rome par le pape Léon III le jour de Noël de l'an 800. Il encourage les écoles et la copie des manuscrits.", q: "En quelle année Charlemagne est-il couronné empereur ?", r: ["800"] },
+  { id: "c3", m: "culture", t: "Jeanne d'Arc", x: "En 1429, pendant la guerre de Cent Ans, Jeanne d'Arc délivre Orléans assiégée par les Anglais, puis fait sacrer Charles VII à Reims. Elle est brûlée à Rouen en 1431.", q: "Quelle ville Jeanne d'Arc a-t-elle délivrée en 1429 ?", r: ["Orléans"] },
+  { id: "c4", m: "culture", t: "L'imprimerie", x: "Vers 1450, à Mayence, Johannes Gutenberg met au point l'imprimerie à caractères mobiles en métal. Son premier grand ouvrage est une Bible. Les livres deviennent moins chers et les idées circulent plus vite.", q: "Qui a mis au point l'imprimerie à caractères mobiles en Europe ?", r: ["Gutenberg", "Johannes Gutenberg"] },
+  { id: "c5", m: "culture", t: "1492", x: "En 1492, Christophe Colomb, financé par les rois d'Espagne, traverse l'Atlantique en cherchant une route vers les Indes. Il atteint les Bahamas le 12 octobre.", q: "Quel navigateur atteint l'Amérique en 1492 ?", r: ["Christophe Colomb", "Colomb"] },
+  { id: "c6", m: "culture", t: "Le baptême de Clovis", x: "Clovis, roi des Francs, se fait baptiser à Reims par l'évêque Remi, vers 496-499. Les rois de France seront ensuite sacrés dans la cathédrale de cette ville.", q: "Dans quelle ville Clovis a-t-il été baptisé ?", r: ["Reims"] },
+  { id: "c7", m: "culture", t: "L'édit de Nantes", x: "En 1598, le roi Henri IV signe l'édit de Nantes, qui accorde la liberté de culte aux protestants et met fin aux guerres de Religion.", q: "Quel roi a signé l'édit de Nantes ?", r: ["Henri IV", "Henri 4", "Henri quatre"] },
+  { id: "c8", m: "culture", t: "Le Roi-Soleil", x: "Louis XIV règne de 1643 à 1715, soit 72 ans : le plus long règne de l'histoire de France. Il fait du château de Versailles le centre du pouvoir.", q: "Combien d'années a duré le règne de Louis XIV ?", r: ["72"] },
+  { id: "c9", m: "culture", t: "Napoléon", x: "Napoléon Bonaparte se fait sacrer empereur des Français le 2 décembre 1804 à Notre-Dame de Paris. Il est définitivement battu à Waterloo, en Belgique, en 1815.", q: "Dans quelle bataille Napoléon est-il définitivement vaincu en 1815 ?", r: ["Waterloo"] },
+  { id: "c10", m: "culture", t: "L'armistice de 1918", x: "La Première Guerre mondiale se termine par l'armistice signé le 11 novembre 1918 dans un wagon, en forêt de Compiègne. Ce jour est férié en France.", q: "Quel jour de novembre l'armistice de 1918 a-t-il été signé ?", r: ["11", "11 novembre", "onze"] },
+  { id: "c11", m: "culture", t: "La fin de la guerre en Europe", x: "L'Allemagne nazie capitule sans condition le 8 mai 1945 : c'est la fin de la Seconde Guerre mondiale en Europe. La guerre continue contre le Japon jusqu'en septembre.", q: "En quelle année s'est terminée la Seconde Guerre mondiale ?", r: ["1945"] },
+  { id: "c12", m: "culture", t: "Les premiers pas sur la Lune", x: "Le 21 juillet 1969 (heure française), Neil Armstrong est le premier homme à marcher sur la Lune lors de la mission Apollo 11. Buzz Aldrin le rejoint quelques minutes plus tard.", q: "Qui est le premier homme à avoir marché sur la Lune ?", r: ["Neil Armstrong", "Armstrong"] },
+  { id: "c13", m: "culture", t: "Le mur de Berlin", x: "Construit en 1961 pour empêcher les habitants de Berlin-Est de fuir vers l'Ouest, le mur de Berlin tombe le 9 novembre 1989. L'Allemagne est réunifiée l'année suivante.", q: "En quelle année le mur de Berlin est-il tombé ?", r: ["1989"] },
+  { id: "c14", m: "culture", t: "La Ve République", x: "La Constitution de la Ve République est adoptée par référendum en 1958, à l'initiative du général de Gaulle, qui en devient le premier président.", q: "En quelle année la Constitution de la Ve République a-t-elle été adoptée ?", r: ["1958"] },
+  { id: "c15", m: "culture", t: "La Tour Eiffel", x: "La tour Eiffel a été construite pour l'Exposition universelle de 1889, centenaire de la Révolution. Elle devait être démontée au bout de 20 ans, mais son utilité pour la radio l'a sauvée.", q: "Pour quelle Exposition universelle (année) la tour Eiffel a-t-elle été construite ?", r: ["1889"] },
+  { id: "c16", m: "culture", t: "La Joconde", x: "La Joconde a été peinte par Léonard de Vinci au début du XVIe siècle. Le tableau est conservé au musée du Louvre, à Paris.", q: "Dans quel musée la Joconde est-elle exposée ?", r: ["Louvre", "musée du Louvre"] },
+  { id: "c17", m: "culture", t: "Victor Hugo", x: "Victor Hugo publie « Les Misérables » en 1862, alors qu'il est en exil à Guernesey. Le roman suit Jean Valjean, ancien bagnard, poursuivi par l'inspecteur Javert.", q: "Quel est le prénom du héros des Misérables, Valjean ?", r: ["Jean"] },
+  { id: "c18", m: "culture", t: "Molière", x: "Molière est le nom de scène de Jean-Baptiste Poquelin (1622-1673), auteur de « L'Avare », « Le Misanthrope » ou « Le Malade imaginaire ». On appelle le français « la langue de Molière ».", q: "Quel est le vrai nom de famille de Molière ?", r: ["Poquelin", "Jean-Baptiste Poquelin"] },
+  { id: "c19", m: "culture", t: "Le plus grand océan", x: "L'océan Pacifique couvre environ un tiers de la surface de la Terre : c'est le plus grand et le plus profond des océans. La fosse des Mariannes y dépasse 10 900 m de profondeur.", q: "Quel est le plus grand océan du monde ?", r: ["Pacifique", "océan Pacifique"] },
+  { id: "c20", m: "culture", t: "La capitale de l'Australie", x: "Contrairement à une idée répandue, la capitale de l'Australie n'est ni Sydney ni Melbourne, mais Canberra, ville construite au début du XXe siècle pour départager les deux rivales.", q: "Quelle est la capitale de l'Australie ?", r: ["Canberra"] },
+  { id: "c21", m: "culture", t: "Le plus long fleuve de France", x: "La Loire est le plus long fleuve de France, avec environ 1 000 km. Elle prend sa source au mont Gerbier-de-Jonc, en Ardèche, et se jette dans l'Atlantique à Saint-Nazaire.", q: "Quel est le plus long fleuve de France ?", r: ["Loire", "la Loire"] },
+  { id: "c22", m: "culture", t: "Le Mont-Blanc", x: "Le Mont-Blanc, à la frontière franco-italienne, culmine à environ 4 805 m. C'est le plus haut sommet des Alpes et de l'Europe occidentale.", q: "Quel est le plus haut sommet des Alpes ?", r: ["Mont-Blanc", "Mont Blanc"] },
+  { id: "c23", m: "culture", t: "L'hymne européen", x: "L'hymne de l'Union européenne reprend l'« Ode à la joie », dernier mouvement de la 9e symphonie de Ludwig van Beethoven, composée alors qu'il était presque sourd.", q: "Quel compositeur a écrit l'Ode à la joie ?", r: ["Beethoven", "Ludwig van Beethoven"] },
+  { id: "c24", m: "culture", t: "L'euro", x: "Les pièces et billets en euros ont été mis en circulation le 1er janvier 2002. En France, 1 euro valait 6,55957 francs.", q: "En quelle année les billets en euros ont-ils été mis en circulation ?", r: ["2002"] },
+  { id: "c25", m: "culture", t: "Le Sahara", x: "Le Sahara est le plus grand désert chaud du monde, avec plus de 9 millions de km², presque la taille des États-Unis. (Les deux plus grands déserts au sens strict sont froids : l'Antarctique et l'Arctique.)", q: "Quel est le plus grand désert chaud du monde ?", r: ["Sahara", "le Sahara"] },
+  { id: "c26", m: "culture", t: "Guernica", x: "« Guernica » est une immense toile peinte par Pablo Picasso en 1937, après le bombardement de cette ville basque pendant la guerre d'Espagne. Elle est exposée à Madrid.", q: "Quel peintre a réalisé Guernica ?", r: ["Picasso", "Pablo Picasso"] },
+  { id: "c27", m: "culture", t: "La capitale du Canada", x: "La capitale du Canada est Ottawa, en Ontario, et non Toronto ni Montréal. La reine Victoria l'a choisie en 1857.", q: "Quelle est la capitale du Canada ?", r: ["Ottawa"] },
+
+  // ---------- français
+  { id: "f1", m: "francais", t: "Le participe passé avec avoir", x: "Avec l'auxiliaire avoir, le participe passé s'accorde avec le complément d'objet direct (COD) seulement s'il est placé avant le verbe. « J'ai cueilli des fleurs » mais « les fleurs que j'ai cueillies ».", q: "Complète : « Les lettres que j'ai (écrire) … »", r: ["écrites"] },
+  { id: "f2", m: "francais", t: "Quand ou quant ?", x: "« Quand » indique le temps (quand viendras-tu ?). « Quant » s'emploie toujours dans « quant à », qui signifie « en ce qui concerne ».", q: "Complète : « … à moi, je reste ici. »", r: ["Quant"] },
+  { id: "f3", m: "francais", t: "Le futur de courir et mourir", x: "Courir, mourir et acquérir prennent deux r au futur et au conditionnel : je courrai, il mourra, nous acquerrons. On entend bien les deux r en prononçant.", q: "Conjugue « courir » au futur avec « je ».", r: ["courrai", "je courrai"] },
+  { id: "f4", m: "francais", t: "Le subjonctif de faire", x: "Le subjonctif présent de faire est irrégulier : que je fasse, que tu fasses, qu'il fasse, que nous fassions, que vous fassiez, qu'ils fassent.", q: "Complète : « Il faut que tu (faire) … tes devoirs. »", r: ["fasses"] },
+  { id: "f5", m: "francais", t: "Le passé simple de venir", x: "Venir et tenir ont un passé simple en -in : je vins, tu vins, il vint, nous vînmes, vous vîntes, ils vinrent.", q: "Conjugue « venir » au passé simple avec « ils ».", r: ["vinrent", "ils vinrent"] },
+  { id: "f6", m: "francais", t: "Appeler et jeter", x: "Appeler et jeter doublent leur consonne devant un e muet : j'appelle, ils jettent ; mais nous appelons, vous jetez.", q: "Conjugue « appeler » au présent avec « ils ».", r: ["appellent", "ils appellent"] },
+  { id: "f7", m: "francais", t: "Les pluriels en -oux", x: "Sept noms en -ou prennent un x au pluriel : bijou, caillou, chou, genou, hibou, joujou, pou. Les autres prennent un s : des clous, des trous.", q: "Quel est le pluriel de « genou » ?", r: ["genoux", "des genoux"] },
+  { id: "f8", m: "francais", t: "Les pluriels en -al", x: "La plupart des noms en -al font leur pluriel en -aux (un cheval, des chevaux), sauf quelques-uns qui prennent un s : bal, carnaval, chacal, festival, récital, régal.", q: "Quel est le pluriel de « festival » ?", r: ["festivals", "des festivals"] },
+  { id: "f9", m: "francais", t: "Vingt et cent", x: "Vingt et cent prennent un s quand ils sont multipliés et terminent le nombre : quatre-vingts, deux cents. Mais quatre-vingt-trois, deux cent dix.", q: "Écris en lettres le nombre 300.", r: ["trois cents", "trois-cents"] },
+  { id: "f10", m: "francais", t: "Demi", x: "« Demi » placé avant le nom est invariable et suivi d'un trait d'union : une demi-heure. Placé après, il s'accorde en genre : une heure et demie.", q: "Complète : « Il est midi et … »", r: ["demi"] },
+  { id: "f11", m: "francais", t: "Leur ou leurs ?", x: "Devant un verbe, « leur » est un pronom (= à eux) et ne prend jamais de s : je leur parle. Devant un nom pluriel, le déterminant prend un s : leurs enfants.", q: "Complète : « Je … ai donné un livre » (à eux).", r: ["leur"] },
+  { id: "f12", m: "francais", t: "Tout", x: "« Tout » adverbe (= tout à fait) est invariable, sauf devant un adjectif féminin commençant par une consonne ou un h aspiré : ils sont tout contents, elles sont toutes contentes.", q: "Complète : « Elles sont … surprises. »", r: ["toutes"] },
+  { id: "f13", m: "francais", t: "Les verbes pronominaux", x: "Dans « elle s'est lavée », le participe s'accorde avec le COD « s' ». Mais dans « elle s'est lavé les mains », le COD est « les mains », placé après : pas d'accord.", q: "Complète : « Elle s'est (laver) … les mains. »", r: ["lavé"] },
+  { id: "f14", m: "francais", t: "Le palindrome", x: "Un palindrome est un mot ou une phrase qui se lit de la même façon dans les deux sens : kayak, radar, « Ésope reste ici et se repose ».", q: "Comment appelle-t-on un mot qui se lit dans les deux sens, comme « radar » ?", r: ["palindrome", "un palindrome"] },
+  { id: "f15", m: "francais", t: "L'oxymore", x: "L'oxymore rapproche deux mots de sens opposés : « cette obscure clarté qui tombe des étoiles » (Corneille), « un silence assourdissant ».", q: "Quelle figure de style rapproche deux mots opposés, comme « obscure clarté » ?", r: ["oxymore", "un oxymore", "oxymoron"] },
+  { id: "f16", m: "francais", t: "Éphémère", x: "Est éphémère ce qui ne dure qu'un temps très court. Le mot vient du grec « hêmera », le jour : l'éphémère est un insecte qui ne vit qu'un jour à l'âge adulte.", q: "Donne un synonyme d'« éphémère ».", r: ["passager", "bref", "fugace", "court", "temporaire", "provisoire", "momentané", "fugitif", "transitoire"] },
+  { id: "f17", m: "francais", t: "Altruiste", x: "Une personne altruiste se soucie des autres et agit pour leur bien, sans intérêt personnel. Son contraire est l'égoïste, qui ne pense qu'à lui.", q: "Quel est le contraire d'« altruiste » ?", r: ["égoïste", "egocentrique", "égocentrique", "individualiste"] },
+  { id: "f18", m: "francais", t: "L'impératif d'aller", x: "À l'impératif, « aller » s'écrit « va » sans s. Mais on ajoute un s devant « y » pour faciliter la prononciation : vas-y.", q: "Complète l'ordre : « … chercher le pain ! » (aller, 2e personne du singulier)", r: ["va"] },
+  { id: "f19", m: "francais", t: "Ces, ses, c'est", x: "« Ces » montre (ces livres-là), « ses » indique la possession (ses livres à lui), « c'est » = cela est.", q: "Complète : « Il a perdu … clés » (les siennes).", r: ["ses"] },
+  { id: "f20", m: "francais", t: "L'œil", x: "Le pluriel d'œil est yeux. On dit pourtant « des œils-de-bœuf » pour les fenêtres rondes, et « des œils-de-chat » pour certaines pierres.", q: "Quel est le pluriel de « œil » ?", r: ["yeux", "des yeux"] },
+  { id: "f21", m: "francais", t: "Bonhomme", x: "Dans « bonhomme », les deux éléments s'accordent au pluriel : des bonshommes. De même : des messieurs, des mesdames, des gentilshommes.", q: "Quel est le pluriel de « bonhomme » ?", r: ["bonshommes", "des bonshommes"] },
+  { id: "f22", m: "francais", t: "Un pléonasme", x: "Le pléonasme répète une idée inutilement : « monter en haut », « descendre en bas », « prévoir à l'avance ». Il est en général à éviter.", q: "Comment s'appelle une répétition inutile comme « monter en haut » ?", r: ["pléonasme", "un pléonasme"] },
+  { id: "f23", m: "francais", t: "Le passé simple d'être", x: "Être au passé simple : je fus, tu fus, il fut, nous fûmes, vous fûtes, ils furent. À ne pas confondre avec le subjonctif imparfait « qu'il fût ».", q: "Conjugue « être » au passé simple avec « nous ».", r: ["fûmes", "nous fûmes"] },
+  { id: "f24", m: "francais", t: "Résoudre", x: "Au présent, résoudre fait : je résous, tu résous, il résout, nous résolvons, vous résolvez, ils résolvent. Son participe passé est « résolu ».", q: "Conjugue « résoudre » au présent avec « il ».", r: ["résout", "il résout"] },
+  { id: "f25", m: "francais", t: "Ou et où", x: "« Ou » sans accent marque un choix (= ou bien). « Où » avec accent indique un lieu ou un moment : où vas-tu ? le jour où il est venu.", q: "Complète : « La ville … je suis né. »", r: ["où"] },
+
+  // ---------- sciences
+  { id: "s1", m: "sciences", t: "La vitesse de la lumière", x: "Dans le vide, la lumière parcourt environ 300 000 km par seconde (exactement 299 792,458 km/s). Elle met environ 8 minutes à nous parvenir du Soleil.", q: "Combien de minutes la lumière du Soleil met-elle environ pour atteindre la Terre ?", r: ["8"], tol: 0.5 },
+  { id: "s2", m: "sciences", t: "Le newton", x: "En physique, une force se mesure en newtons (N), en hommage à Isaac Newton. Sur Terre, un objet de 1 kg pèse environ 9,8 N.", q: "Quelle est l'unité de mesure d'une force ?", r: ["newton", "newtons", "N"] },
+  { id: "s3", m: "sciences", t: "La loi d'Ohm", x: "La loi d'Ohm relie tension, résistance et intensité : U = R × I. La tension U est en volts, la résistance R en ohms, l'intensité I en ampères. Donc I = U ÷ R.", q: "Une résistance de 4 ohms est soumise à 12 volts. Quelle est l'intensité, en ampères ?", r: ["3"] },
+  { id: "s4", m: "sciences", t: "Le zéro absolu", x: "Le zéro absolu, la température la plus basse possible, vaut 0 kelvin, soit −273,15 °C. À cette température, l'agitation des particules est minimale.", q: "À combien de degrés Celsius correspond le zéro absolu (arrondi à l'unité) ?", r: ["-273"], tol: 0.2 },
+  { id: "s5", m: "sciences", t: "Le son et le vide", x: "Le son est une vibration qui se propage dans la matière (air, eau, solides). Dans le vide de l'espace, il n'y a rien pour la transmettre : aucun son ne peut s'y propager.", q: "Le son se propage-t-il dans le vide ? (oui ou non)", r: ["non"] },
+  { id: "s6", m: "sciences", t: "E = mc²", x: "Dans la célèbre formule d'Einstein E = mc², E est l'énergie, m la masse et c la vitesse de la lumière. Une toute petite masse correspond à une énergie énorme.", q: "Dans E = mc², que représente la lettre c ?", r: ["vitesse de la lumière", "la vitesse de la lumière", "célérité de la lumière", "la lumière"] },
+  { id: "s7", m: "sciences", t: "La pesanteur", x: "Sur Terre, un objet qui tombe sans frottement accélère d'environ 9,81 m/s² : c'est l'intensité de la pesanteur, notée g. Sur la Lune, elle est environ six fois plus faible.", q: "Combien de fois la pesanteur est-elle plus faible sur la Lune que sur Terre (environ) ?", r: ["6"], tol: 0.3 },
+  { id: "s8", m: "sciences", t: "L'eau", x: "La molécule d'eau, H₂O, est formée de deux atomes d'hydrogène et d'un atome d'oxygène. Au niveau de la mer, l'eau pure bout à 100 °C.", q: "Combien d'atomes d'hydrogène contient une molécule d'eau ?", r: ["2", "deux"] },
+  { id: "s9", m: "sciences", t: "Le symbole du sodium", x: "Dans le tableau périodique, le sodium a pour symbole Na, de son nom latin « natrium ». Le sel de cuisine est du chlorure de sodium, NaCl.", q: "Quel est le symbole chimique du sodium ?", r: ["Na"] },
+  { id: "s10", m: "sciences", t: "Le symbole de l'or", x: "L'or a pour symbole Au, du latin « aurum ». C'est un métal très peu réactif : il ne rouille pas, ce qui explique qu'on retrouve des bijoux intacts après des millénaires.", q: "Quel est le symbole chimique de l'or ?", r: ["Au"] },
+  { id: "s11", m: "sciences", t: "Le pH", x: "Le pH mesure l'acidité d'une solution, sur une échelle de 0 à 14. Un pH de 7 est neutre (eau pure), en dessous c'est acide (citron, environ 2), au-dessus c'est basique (savon).", q: "Quelle est la valeur du pH d'une solution neutre ?", r: ["7"] },
+  { id: "s12", m: "sciences", t: "L'air que l'on respire", x: "L'air est composé d'environ 78 % de diazote, 21 % de dioxygène et 1 % d'autres gaz, dont l'argon et le dioxyde de carbone.", q: "Quel gaz est le plus abondant dans l'air ?", r: ["azote", "diazote", "N2"] },
+  { id: "s13", m: "sciences", t: "Le numéro atomique", x: "Le numéro atomique d'un élément est le nombre de protons dans son noyau. L'hydrogène a 1 proton, le carbone 6, l'oxygène 8.", q: "Quel est le numéro atomique du carbone ?", r: ["6"] },
+  { id: "s14", m: "sciences", t: "Le tableau périodique", x: "En 1869, le chimiste russe Dmitri Mendeleïev classe les éléments chimiques par masse et par propriétés, et laisse des cases vides pour des éléments encore inconnus, qui seront découverts ensuite.", q: "Quel chimiste russe a créé le tableau périodique des éléments ?", r: ["Mendeleïev", "Mendeleiev", "Dmitri Mendeleïev"] },
+  { id: "s15", m: "sciences", t: "Les chromosomes", x: "Chaque cellule humaine (sauf les ovules et les spermatozoïdes) contient 46 chromosomes, répartis en 23 paires. Ils portent notre ADN.", q: "Combien de chromosomes contient une cellule humaine ordinaire ?", r: ["46"] },
+  { id: "s16", m: "sciences", t: "La photosynthèse", x: "Grâce à la lumière, les plantes fabriquent du sucre à partir de dioxyde de carbone et d'eau, et rejettent du dioxygène. C'est la photosynthèse, qui a lieu dans les chloroplastes.", q: "Quel gaz les plantes rejettent-elles pendant la photosynthèse ?", r: ["oxygène", "dioxygène", "O2"] },
+  { id: "s17", m: "sciences", t: "La mitochondrie", x: "La mitochondrie est la « centrale énergétique » de la cellule : elle utilise l'oxygène pour transformer le sucre en énergie utilisable.", q: "Quel organite est la centrale énergétique de la cellule ?", r: ["mitochondrie", "la mitochondrie", "mitochondries"] },
+  { id: "s18", m: "sciences", t: "L'ADN", x: "L'ADN a la forme d'une double hélice, découverte en 1953 par James Watson et Francis Crick, grâce aux images de Rosalind Franklin.", q: "Quelle forme a la molécule d'ADN ? (deux mots)", r: ["double hélice", "une double hélice"] },
+  { id: "s19", m: "sciences", t: "La fin des dinosaures", x: "Les dinosaures non aviens ont disparu il y a environ 66 millions d'années, à la fin du Crétacé, probablement après la chute d'un astéroïde au Mexique (cratère de Chicxulub). Les oiseaux sont leurs descendants.", q: "Il y a combien de millions d'années les dinosaures non aviens ont-ils disparu ?", r: ["66"], tol: 1 },
+  { id: "s20", m: "sciences", t: "Le Tyrannosaure", x: "Tyrannosaurus rex a vécu à la toute fin du Crétacé, il y a 68 à 66 millions d'années, en Amérique du Nord. Il est donc plus proche de nous dans le temps que du Stégosaure, qui vivait au Jurassique.", q: "À quelle période géologique vivait le Tyrannosaure ?", r: ["Crétacé", "le Crétacé"] },
+  { id: "s21", m: "sciences", t: "Archaeopteryx", x: "Archaeopteryx, découvert en Allemagne en 1861, vivait au Jurassique. Avec ses plumes, ses dents et sa longue queue osseuse, il montre le lien entre dinosaures et oiseaux.", q: "Quel animal fossile montre le lien entre dinosaures et oiseaux (découvert en 1861) ?", r: ["Archaeopteryx", "Archéoptéryx", "archeopteryx"] },
+  { id: "s22", m: "sciences", t: "Lucy", x: "Lucy est un squelette d'australopithèque découvert en 1974 en Éthiopie. Elle a vécu il y a environ 3,2 millions d'années et marchait déjà sur deux jambes.", q: "Dans quel pays Lucy a-t-elle été découverte ?", r: ["Éthiopie", "Ethiopie"] },
+  { id: "s23", m: "sciences", t: "Les plus anciens Homo sapiens", x: "Les plus anciens fossiles connus d'Homo sapiens, découverts à Jebel Irhoud au Maroc, ont environ 300 000 ans.", q: "Dans quel pays ont été trouvés les plus anciens fossiles connus d'Homo sapiens ?", r: ["Maroc"] },
+  { id: "s24", m: "sciences", t: "La Pangée", x: "Il y a environ 300 millions d'années, les continents étaient réunis en un seul supercontinent, la Pangée, entouré d'un océan unique. Il s'est fragmenté à partir de 200 millions d'années.", q: "Comment s'appelle le supercontinent qui réunissait toutes les terres ?", r: ["Pangée", "la Pangée", "Pangea"] },
+  { id: "s25", m: "sciences", t: "Les trilobites", x: "Les trilobites sont des arthropodes marins apparus il y a plus de 520 millions d'années. Ils ont disparu à la fin du Paléozoïque (ère primaire), il y a 252 millions d'années.", q: "Les trilobites vivaient-ils dans la mer ou sur terre ?", r: ["mer", "dans la mer", "océan", "la mer"] },
+  { id: "s26", m: "sciences", t: "Le carbone 14", x: "Le carbone 14 permet de dater des restes organiques (os, bois, charbon) jusqu'à environ 50 000 ans. Au-delà, il en reste trop peu : on utilise d'autres méthodes pour les fossiles de dinosaures.", q: "Jusqu'à combien d'années environ peut-on dater avec le carbone 14 ?", r: ["50000"], tol: 5000 },
+  { id: "s27", m: "sciences", t: "La plus grosse planète", x: "Jupiter est la plus grosse planète du Système solaire : on pourrait y loger plus de 1 300 Terres. C'est une géante gazeuse, surtout faite d'hydrogène et d'hélium.", q: "Quelle est la plus grosse planète du Système solaire ?", r: ["Jupiter"] },
+  { id: "s28", m: "sciences", t: "L'âge de la Terre", x: "La Terre s'est formée il y a environ 4,5 milliards d'années, en même temps que le reste du Système solaire.", q: "Quel âge a la Terre, en milliards d'années (environ) ?", r: ["4.5", "4,5"], tol: 0.1 },
+  { id: "s29", m: "sciences", t: "La planète la plus proche du Soleil", x: "Mercure est la planète la plus proche du Soleil et la plus petite du Système solaire. Elle fait le tour du Soleil en 88 jours.", q: "Quelle est la planète la plus proche du Soleil ?", r: ["Mercure"] },
+  { id: "s30", m: "sciences", t: "La distance de la Lune", x: "La Lune est en moyenne à 384 400 km de la Terre. La lumière met un peu plus d'une seconde pour faire ce trajet.", q: "À environ combien de milliers de km la Lune se trouve-t-elle ? (ex. : 384)", r: ["384"], tol: 6 },
+  { id: "s31", m: "sciences", t: "Le noyau de la Terre", x: "Le noyau terrestre est surtout composé de fer, avec un peu de nickel. Le noyau externe est liquide : ses mouvements créent le champ magnétique terrestre.", q: "Quel métal compose principalement le noyau de la Terre ?", r: ["fer", "le fer"] },
+  { id: "s32", m: "sciences", t: "Marie Curie", x: "Marie Curie est la première personne à avoir reçu deux prix Nobel : en physique (1903) pour la radioactivité, et en chimie (1911) pour la découverte du polonium et du radium.", q: "Combien de prix Nobel Marie Curie a-t-elle reçus ?", r: ["2", "deux"] },
+
+  // ---------- logique
+  { id: "l1", m: "logique", t: "Les machines", x: "Raisonne par machine : regarde combien de temps met une seule machine pour fabriquer un objet.", q: "5 machines fabriquent 5 objets en 5 minutes. Combien de minutes faut-il à 100 machines pour fabriquer 100 objets ?", r: ["5"] },
+  { id: "l2", m: "logique", t: "La batte et la balle", x: "Méfie-toi de la première réponse qui vient à l'esprit : pose l'équation. Si la balle coûte x, la batte coûte x + 1 €.", q: "Une batte et une balle coûtent 1,10 € en tout. La batte coûte 1 € de plus que la balle. Combien coûte la balle, en centimes ?", r: ["5"] },
+  { id: "l3", m: "logique", t: "Les nénuphars", x: "Quand une quantité double chaque jour, la veille elle valait la moitié.", q: "Des nénuphars doublent de surface chaque jour et couvrent tout le lac en 48 jours. En combien de jours couvrent-ils la moitié du lac ?", r: ["47"] },
+  { id: "l4", m: "logique", t: "Les mois", x: "Lis la question mot à mot : on ne demande pas « seulement 28 jours ».", q: "Combien de mois de l'année ont 28 jours ?", r: ["12", "douze"] },
+  { id: "l5", m: "logique", t: "La course", x: "Imagine la situation : tu prends la place de celui que tu dépasses.", q: "Dans une course, tu doubles le deuxième. À quelle place es-tu maintenant ? (un nombre)", r: ["2", "deuxième", "2e"] },
+  { id: "l6", m: "logique", t: "Les chaussettes", x: "Pense au pire des cas : chaque chaussette tirée pourrait être d'une couleur différente.", q: "Un tiroir contient des chaussettes noires et blanches mélangées. Combien faut-il en prendre, dans le noir, pour être sûr d'avoir une paire de la même couleur ?", r: ["3", "trois"] },
+  { id: "l7", m: "logique", t: "Les poignées de main", x: "Chaque personne serre la main de toutes les autres une fois : n personnes donnent n × (n − 1) ÷ 2 poignées de main.", q: "6 personnes se serrent toutes la main une fois. Combien y a-t-il de poignées de main ?", r: ["15", "quinze"] },
+  { id: "l8", m: "logique", t: "L'âge du père", x: "Écris les deux âges : le père a 4 fois l'âge du fils aujourd'hui. Dans 20 ans, il n'en aura plus que le double.", q: "Un père a 4 fois l'âge de son fils. Dans 20 ans, il aura le double de son âge. Quel âge a le fils aujourd'hui ?", r: ["10", "dix"] },
+];
+
+const MATIERES = {
+  culture: "Culture générale", francais: "Français", sciences: "Sciences", logique: "Logique", calcul: "Calcul mental",
+};
+
+// Calcul mental : questions générées sans fin, à partir d'une graine
+function genererCalcul(graine) {
+  let s = graine >>> 0;
+  const r = (a, b) => { s = (Math.imul(s ^ (s >>> 15), 2246822507) + 0x9E3779B9) >>> 0; return a + (s % (b - a + 1)); };
+  const types = [
+    () => { const a = r(13, 49), b = r(3, 9); return { t: "Multiplier de tête", x: "Astuce : décompose le grand nombre. " + a + " × " + b + " = (" + (a - a % 10) + " × " + b + ") + (" + (a % 10) + " × " + b + ").", q: a + " × " + b + " = ?", r: [String(a * b)] }; },
+    () => { const p = [10, 15, 20, 25, 30, 40, 50, 75][r(0, 7)], n = r(2, 24) * 20; return { t: "Pourcentage", x: "Astuce : 10 % = diviser par 10 ; 5 % = la moitié de 10 % ; 25 % = le quart.", q: p + " % de " + n + " = ?", r: [String(p * n / 100)] }; },
+    () => { const b = r(6, 15), q = r(12, 35); return { t: "Division", x: "Astuce : cherche le multiple de " + b + " le plus proche, puis complète.", q: (b * q) + " ÷ " + b + " = ?", r: [String(q)] }; },
+    () => { const a = r(11, 25); return { t: "Carré", x: "Astuce : (a + b)² = a² + 2ab + b². Par exemple 13² = 100 + 60 + 9 = 169.", q: a + "² = ?", r: [String(a * a)] }; },
+    () => { const a = r(120, 899), b = r(110, 799); return { t: "Addition", x: "Astuce : ajoute d'abord les centaines, puis les dizaines, puis les unités.", q: a + " + " + b + " = ?", r: [String(a + b)] }; },
+    () => { const b = r(120, 499), a = b + r(110, 499); return { t: "Soustraction", x: "Astuce : complète jusqu'à la centaine supérieure, puis ajoute le reste.", q: a + " − " + b + " = ?", r: [String(a - b)] }; },
+    () => { const d = r(2, 9), u = r(3, 9), k = r(2, 6); return { t: "Fraction d'un nombre", x: "Pour prendre les " + k + "/" + d + " d'un nombre : divise par " + d + ", puis multiplie par " + k + ".", q: k + "/" + d + " de " + (d * u * 4) + " = ?", r: [String(k * u * 4)] }; },
+    () => { const v = [60, 80, 90, 100, 120][r(0, 4)], h = [1.5, 2, 2.5, 3][r(0, 3)]; return { t: "Vitesse et distance", x: "Distance = vitesse × durée. 1 h 30 = 1,5 h ; 2 h 30 = 2,5 h.", q: "À " + v + " km/h pendant " + String(h).replace(".", ",") + " h, combien de km parcourt-on ?", r: [String(v * h)] }; },
+    () => { const a = r(1, 9), d = r(3, 9); const suite = [a, a + d, a + 2 * d, a + 3 * d]; return { t: "Suite logique", x: "Cherche ce qui change d'un nombre au suivant : on ajoute toujours la même valeur.", q: "Quel nombre vient ensuite : " + suite.join(", ") + ", … ?", r: [String(a + 4 * d)] }; },
+    () => { const a = r(1, 4), k = r(2, 3); const suite = [a, a * k, a * k * k, a * k * k * k]; return { t: "Suite logique", x: "Ici, on multiplie toujours par le même nombre.", q: "Quel nombre vient ensuite : " + suite.join(", ") + ", … ?", r: [String(a * k ** 4)] }; },
+    () => { const h = r(2, 5), m = [15, 30, 45][r(0, 2)]; return { t: "Conversion de durées", x: "1 heure = 60 minutes. Multiplie les heures par 60, puis ajoute les minutes.", q: h + " h " + m + " = combien de minutes ?", r: [String(h * 60 + m)] }; },
+  ];
+  const l = types[r(0, types.length - 1)]();
+  l.m = "calcul";
+  l.id = "calc:" + graine;
+  return l;
+}
+
+"use strict";
+/* Mes Quêtes 2 — quêtes quotidiennes façon jeu de rôle, avec propositions du jour,
+   leçons validées par la bonne réponse et perte de niveau quand la série est rompue.
+   Les contenus (prières, séances, leçons…) sont dans contenu.js. Données gardées sur l'appareil. */
+
+// ------------------------------------------------------------------ constantes
+const CLE = "mesquetes.v1";
+const VERSION_DONNEES = 2;
+const CATS = {
+  force: { nom: "Force", c: "var(--force)", f: "var(--force-f)", aide: "Sport, exercices" },
+  savoir: { nom: "Savoir", c: "var(--savoir)", f: "var(--savoir-f)", aide: "Leçons, lecture" },
+  esprit: { nom: "Esprit", c: "var(--esprit)", f: "var(--esprit-f)", aide: "Prière, chapelet" },
+  vitalite: { nom: "Vitalité", c: "var(--vitalite)", f: "var(--vitalite-f)", aide: "Sommeil, eau, repas" },
+  discipline: { nom: "Discipline", c: "var(--discipline)", f: "var(--discipline-f)", aide: "Habitudes, rangement, écrans" },
+};
+const MOMENTS = { matin: "Matin", journee: "Journée", soir: "Soir", libre: "À tout moment" };
+const CONTENUS = {
+  "": "Aucune", priere_matin: "Prière du matin", priere_soir: "Prière du soir", chapelet: "Chapelet", exercices: "Séance d'exercices",
+  course: "Séance de course", lecture: "Idée de lecture", lecon: "Leçons à réussir",
+};
+const JOURS_COURTS = ["L", "M", "M", "J", "V", "S", "D"];
+const JOURS_NOMS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const XP_CHOIX = [10, 20, 30, 40, 50, 60, 80, 100];
+const BONUS_COFFRE = 100;
+const ESSAIS_LECON = 3;
+
+const ICONES = {
+  soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  lune: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  bougie: '<path d="M9 10h6v11H9zM12 10V8M12 8c-1.3-1-1.3-2.6 0-4.2 1.3 1.6 1.3 3.2 0 4.2z"/>',
+  croix: '<path d="M12 3v18M7 8h10"/>',
+  chapelet: '<circle cx="12" cy="9" r="6"/><circle cx="12" cy="3" r="1"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><path d="M12 15v6M10 18h4"/>',
+  livre_ouvert: '<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>',
+  livre: '<path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3zM4 17a3 3 0 0 1 3-3h11"/>',
+  crayon: '<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
+  eclair: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  haltere: '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+  goutte: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  pomme: '<path d="M12 7c-2-1.5-6-1-6 4 0 4 3 9 6 7 3 2 6-3 6-7 0-5-4-5.5-6-4zM12 7c0-2 1-3 3-4"/>',
+  lit: '<path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11.5" r="1.5"/>',
+  coeur: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  feuille: '<path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15M5 19l7-7"/>',
+  musique: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  cible: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/>',
+  horloge: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  etoile: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  flacon: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.4 2h11.2a1.5 1.5 0 0 0 1.4-2l-5-10V3M7.5 15h9"/>',
+  // icônes d'interface
+  coche: '<path d="M5 12l5 5 9-10"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  moins: '<path d="M5 12h14"/>',
+  croixFermer: '<path d="M6 6l12 12M18 6 6 18"/>',
+  epee: '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/>',
+  bouclier: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+  bouclierOk: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  bouclierBrise: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="M12 6l-2 5 3 2-2 5"/>',
+  calendrier: '<path d="M8 2v4M16 2v4M3 9h18M5 5h14v16H5z"/>',
+  reglages: '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5"/><circle cx="15" cy="17" r="2.5"/>',
+  coffre: '<path d="M3 10h18v10H3zM3 10l2-5h14l2 5M12 10v10M10 14h4"/>',
+  cadenas: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  gauche: '<path d="M15 5l-7 7 7 7"/>',
+  droite: '<path d="M9 5l7 7-7 7"/>',
+  haut: '<path d="M6 15l6-6 6 6"/>',
+  modifier: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  des: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>',
+  lecture: '<path d="M8 5v14l11-7z"/>',
+  calcul: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',
+};
+const ICONES_QUETE = ["soleil", "lune", "croix", "chapelet", "bougie", "livre_ouvert", "livre", "crayon", "eclair", "haltere", "goutte", "pomme",
+  "lit", "coeur", "feuille", "musique", "cible", "horloge", "etoile", "flacon"];
+
+const TITRES = [[1, "Novice"], [3, "Apprenti"], [5, "Apprenti assidu"], [8, "Érudit discipliné"], [10, "Compagnon"], [13, "Aventurier aguerri"],
+  [16, "Chevalier du quotidien"], [20, "Maître de soi"], [25, "Sage"], [30, "Légende"], [40, "Mythe vivant"]];
+
+const SURPRISES = [
+  ["Appeler un proche pour prendre de ses nouvelles", "coeur", "esprit", 30],
+  ["Ranger un tiroir ou une étagère", "cible", "discipline", 30],
+  ["10 minutes de silence devant Dieu", "bougie", "esprit", 30],
+  ["Écrire trois choses pour lesquelles je rends grâce", "crayon", "esprit", 25],
+  ["Pas de réseaux sociaux avant midi", "horloge", "discipline", 40],
+  ["Apprendre 10 mots d'une langue étrangère", "livre_ouvert", "savoir", 30],
+  ["Faire un compliment sincère à quelqu'un", "coeur", "esprit", 25],
+  ["Cuisiner un repas maison", "pomme", "vitalite", 35],
+  ["Se coucher avant 23 h", "lit", "vitalite", 35],
+  ["10 minutes d'étirements", "haltere", "force", 30],
+  ["Donner ou jeter 10 objets inutiles", "cible", "discipline", 35],
+  ["Lire un article de fond jusqu'au bout", "livre", "savoir", 25],
+  ["Rendre service à quelqu'un sans qu'il le demande", "coeur", "esprit", 35],
+  ["Prendre l'escalier toute la journée", "eclair", "force", 25],
+  ["Planifier la journée de demain", "calendrier", "discipline", 25],
+  ["Sortir prendre l'air 15 minutes", "feuille", "vitalite", 25],
+  ["2 minutes de gainage", "haltere", "force", 30],
+  ["Réviser une leçon passée", "livre_ouvert", "savoir", 30],
+  ["Ranger mon bureau", "cible", "discipline", 25],
+  ["Envoyer un message d'encouragement", "coeur", "esprit", 25],
+  ["Apprendre par cœur un verset de la Bible", "croix", "esprit", 30],
+  ["Un repas sans écran", "pomme", "discipline", 25],
+  ["Lire l'Évangile du jour", "croix", "esprit", 25],
+  ["Marcher 20 minutes après un repas", "eclair", "force", 30],
+  ["Écrire une page de journal", "crayon", "savoir", 30],
+];
+
+const HAUTS_FAITS = [
+  { id: "premier", nom: "Premier pas", desc: "1re quête accomplie", ic: "etoile", v: s => s.quetes, max: 1 },
+  { id: "parfait", nom: "Journée parfaite", desc: "Toutes les quêtes du jour", ic: "cible", v: s => s.parfaits, max: 1 },
+  { id: "invaincu", nom: "Invaincu", desc: "7 jours réussis de suite", ic: "bouclierOk", v: s => s.record, max: 7 },
+  { id: "inebranlable", nom: "Inébranlable", desc: "30 jours réussis de suite", ic: "bouclierOk", v: s => s.record, max: 30 },
+  { id: "indomptable", nom: "Indomptable", desc: "100 jours réussis de suite", ic: "bouclierOk", v: s => s.record, max: 100 },
+  { id: "semaine", nom: "Semaine parfaite", desc: "7 journées parfaites de suite", ic: "cible", v: s => s.recordParfait, max: 7 },
+  { id: "eleve", nom: "Bon élève", desc: "50 bonnes réponses", ic: "livre_ouvert", v: s => s.lecons, max: 50 },
+  { id: "savant", nom: "Savant", desc: "300 bonnes réponses", ic: "flacon", v: s => s.lecons, max: 300 },
+  { id: "lecteur", nom: "Rat de bibliothèque", desc: "500 pages lues", ic: "livre", v: s => s.pages, max: 500 },
+  { id: "guerrier", nom: "Guerrier", desc: "50 quêtes de Force", ic: "haltere", v: s => s.parCat.force, max: 50 },
+  { id: "erudit", nom: "Érudit", desc: "50 quêtes de Savoir", ic: "livre_ouvert", v: s => s.parCat.savoir, max: 50 },
+  { id: "ame", nom: "Âme fidèle", desc: "50 quêtes d'Esprit", ic: "croix", v: s => s.parCat.esprit, max: 50 },
+  { id: "increvable", nom: "Increvable", desc: "50 quêtes de Vitalité", ic: "goutte", v: s => s.parCat.vitalite, max: 50 },
+  { id: "roc", nom: "Roc", desc: "50 quêtes de Discipline", ic: "cible", v: s => s.parCat.discipline, max: 50 },
+  { id: "explorateur", nom: "Explorateur", desc: "20 quêtes surprises", ic: "des", v: s => s.surprises, max: 20 },
+  { id: "chroniqueur", nom: "Chroniqueur", desc: "10 pages de journal", ic: "crayon", v: s => s.notes, max: 10 },
+  { id: "centurion", nom: "Centurion", desc: "100 quêtes accomplies", ic: "epee", v: s => s.quetes, max: 100 },
+  { id: "veteran", nom: "Vétéran", desc: "1 000 quêtes accomplies", ic: "epee", v: s => s.quetes, max: 1000 },
+  { id: "compagnon", nom: "Compagnon", desc: "Atteindre le niveau 10", ic: "bouclier", v: s => s.niveau, max: 10 },
+  { id: "maitre", nom: "Maître de soi", desc: "Atteindre le niveau 20", ic: "bouclier", v: s => s.niveau, max: 20 },
+];
+
+const TOUS = [0, 1, 2, 3, 4, 5, 6];
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function quetesParDefaut() {
+  return [
+    { id: "q1", nom: "Prière du matin", detail: "Une prière proposée chaque jour", cat: "esprit", xp: 30, type: "case", jours: TOUS, moment: "matin", icone: "soleil", contenu: "priere_matin", actif: true },
+    { id: "q2", nom: "Exercices", detail: "La séance du jour au poids du corps", cat: "force", xp: 40, type: "case", jours: TOUS, moment: "matin", icone: "haltere", contenu: "exercices", actif: true },
+    { id: "q3", nom: "Apprendre", detail: "Réponds juste aux leçons du jour", cat: "savoir", xp: 50, type: "compteur", objectif: 3, unite: "leçons", pas: 1, jours: TOUS, moment: "journee", icone: "livre_ouvert", contenu: "lecon", actif: true },
+    { id: "q4", nom: "Lecture", detail: "Un bon livre", cat: "savoir", xp: 40, type: "compteur", objectif: 20, unite: "pages", pas: 5, jours: TOUS, moment: "journee", icone: "livre", contenu: "lecture", actif: true },
+    { id: "q5", nom: "Sport", detail: "La séance de course du jour", cat: "force", xp: 60, type: "case", jours: [0, 2, 4, 5], moment: "journee", icone: "eclair", contenu: "course", actif: true },
+    { id: "q6", nom: "Hydratation", detail: "Environ 2 litres", cat: "vitalite", xp: 20, type: "compteur", objectif: 8, unite: "verres", pas: 1, jours: TOUS, moment: "libre", icone: "goutte", contenu: "", actif: true },
+    { id: "q7", nom: "Prière du soir", detail: "Examen de conscience et prière", cat: "esprit", xp: 30, type: "case", jours: TOUS, moment: "soir", icone: "lune", contenu: "priere_soir", actif: true },
+    { id: "q8", nom: "Sans écran au coucher", detail: "Pas de téléphone la dernière heure", cat: "discipline", xp: 40, type: "case", jours: TOUS, moment: "soir", icone: "lit", contenu: "", actif: false },
+    { id: "q10", nom: "Chapelet", detail: "Une dizaine avec le mystère du jour", cat: "esprit", xp: 40, type: "compteur", objectif: 1, unite: "dizaine", pas: 1, jours: TOUS, moment: "soir", icone: "chapelet", contenu: "chapelet", actif: false },
+  ];
+}
+function etatInitial() {
+  return { v: VERSION_DONNEES, nom: "Nence", quetes: quetesParDefaut(), jours: {}, succes: {}, lecVues: [], penalitesVues: 0, depuis: iso(new Date()),
+    params: { seuil: 0.5, son: true, surprise: true, debut: 0, penalite: "rupture", matieres: ["culture", "francais", "sciences", "logique", "calcul"] },
+    cree: new Date().toISOString() };
+}
+
+// ------------------------------------------------------------------ stockage
+function valide(s) { return s && Array.isArray(s.quetes) && s.jours && typeof s.jours === "object"; }
+function completer(s) {
+  const d = etatInitial();
+  s.params = Object.assign({}, d.params, s.params || {});
+  if (!Array.isArray(s.params.matieres)) s.params.matieres = d.params.matieres.slice();
+  s.succes = s.succes || {};
+  s.lecVues = Array.isArray(s.lecVues) ? s.lecVues : [];
+  s.penalitesVues = s.penalitesVues || 0;
+  s.nom = s.nom == null ? d.nom : s.nom;
+  s.cree = s.cree || new Date().toISOString();
+  s.depuis = s.depuis || iso(new Date(s.cree));
+  if ((s.v || 1) < 2) { // version 1 -> 2 : propositions, leçons, chapelet
+    const liens = { q1: "priere_matin", q7: "priere_soir", q2: "exercices", q5: "course", q4: "lecture" };
+    for (const q of s.quetes) {
+      if (liens[q.id] && q.contenu == null) q.contenu = liens[q.id];
+      if (q.id === "q3") Object.assign(q, { nom: "Apprendre", detail: "Réponds juste aux leçons du jour", type: "compteur", objectif: 3, unite: "leçons", pas: 1, contenu: "lecon", icone: "livre_ouvert" });
+      if (q.contenu == null) q.contenu = "";
+    }
+    if (!s.quetes.some(q => q.contenu === "chapelet")) s.quetes.push(quetesParDefaut().find(q => q.id === "q10"));
+    s.depuis = iso(new Date()); // les jours d'avant la mise à jour ne font pas perdre de niveau
+    s.v = 2;
+  }
+  return s;
+}
+function charger() {
+  try {
+    const t = localStorage.getItem(CLE);
+    if (!t) return null;
+    const s = JSON.parse(t);
+    return valide(s) ? completer(s) : null;
+  } catch (e) { return null; }
+}
+let S = charger() || etatInitial();
+function sauver() { try { localStorage.setItem(CLE, JSON.stringify(S)); } catch (e) { /* stockage indisponible */ } }
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* facultatif */ }
+
+// ------------------------------------------------------------------ outils
+const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = n => Math.round(n).toLocaleString("fr-FR");
+function ic(nom, couleur = "currentColor", taille = 20, epais = 2) {
+  return `<svg width="${taille}" height="${taille}" viewBox="0 0 24 24" fill="none" stroke="${couleur}" stroke-width="${epais}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[nom] || ICONES.etoile}</svg>`;
+}
+const deIso = k => { const [a, m, j] = k.split("-").map(Number); return new Date(a, m - 1, j); };
+const decale = (k, n) => { const d = deIso(k); d.setDate(d.getDate() + n); return iso(d); };
+const jourSemaine = k => (deIso(k).getDay() + 6) % 7;
+const numJour = k => Math.round((deIso(k) - new Date(2020, 0, 6)) / 864e5); // jours depuis un lundi de référence
+function aujourdhui() { return iso(new Date(Date.now() - (S.params.debut || 0) * 3600e3)); }
+function dateLongue(k) { const d = deIso(k); return `${JOURS_NOMS[jourSemaine(k)]} ${d.getDate()} ${MOIS[d.getMonth()]}`; }
+const majuscule = t => t.charAt(0).toUpperCase() + t.slice(1);
+function hash(t) { let h = 2166136261; for (const c of String(t)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const pluriel = (n, mot) => n + " " + mot + (n > 1 ? (/(au|eu)$/.test(mot) ? "x" : "s") : "");
+
+// ------------------------------------------------------------------ journées
+function queteId(id) { return S.quetes.find(q => q.id === id); }
+function prevues(k) { const js = jourSemaine(k); return S.quetes.filter(q => q.actif && (q.jours || TOUS).includes(js)); }
+function jour(k, creer = true) {
+  let j = S.jours[k];
+  if (!j && !creer) return null;
+  if (!j) j = S.jours[k] = { liste: [], q: {}, gains: {}, coffre: false, note: "", humeur: "", energie: "" };
+  if (k === aujourdhui()) { // la liste du jour suit la configuration actuelle
+    const ids = prevues(k).map(q => q.id);
+    const faites = Object.keys(j.q).filter(id => !ids.includes(id) && queteId(id));
+    j.liste = ids.concat(faites);
+  } else if (!j.liste.length && !Object.keys(j.q).length) {
+    j.liste = prevues(k).map(q => q.id);
+  }
+  return j;
+}
+function estFaite(q, v) { return q && q.type === "compteur" ? (Number(v) || 0) >= (q.objectif || 1) : !!v; }
+function bilanJour(k) {
+  const j = S.jours[k];
+  if (!j) { const t = prevues(k).length; return { total: t, faites: 0, ratio: 0, xp: 0 }; }
+  const liste = j.liste.length ? j.liste : prevues(k).map(q => q.id);
+  const total = liste.length, faites = liste.filter(id => j.gains[id]).length;
+  const xp = Object.values(j.gains).reduce((a, g) => a + g.xp, 0);
+  return { total, faites, ratio: total ? faites / total : 0, xp };
+}
+function besoin(k) { const b = bilanJour(k); return Math.ceil(b.total * S.params.seuil - 1e-9); }
+function reussi(k) { const b = bilanJour(k); return b.total > 0 && b.faites >= besoin(k); }
+function jourSansQuete(k) { return prevues(k).length === 0 && !(S.jours[k] && S.jours[k].liste.length); }
+function surpriseDu(k) {
+  if (!S.params.surprise) return null;
+  const j = jour(k);
+  if (!j.surprise) j.surprise = { i: hash(k) % SURPRISES.length, change: 0 };
+  const [nom, icone, cat, xp] = SURPRISES[j.surprise.i];
+  return { nom, icone, cat, xp, fait: !!j.gains._surprise, change: j.surprise.change };
+}
+
+// ------------------------------------------------------------------ niveaux, séries et pénalités
+function seuilNiveau(L) { return 50 * L * (L - 1); } // XP cumulée pour atteindre le niveau L
+function niveauDe(xp) { let L = 1; while (xp >= seuilNiveau(L + 1)) L++; return L; }
+function titreDe(L) { let t = TITRES[0][1]; for (const [n, nom] of TITRES) if (L >= n) t = nom; return t; }
+function prochainTitre(L) { return TITRES.find(([n]) => n > L) || null; }
+function perdreNiveau(xp) {
+  // redescend d'un niveau en gardant la même progression relative dans le niveau
+  const L = niveauDe(xp);
+  if (L <= 1) return 0;
+  const frac = (xp - seuilNiveau(L)) / (seuilNiveau(L + 1) - seuilNiveau(L));
+  return Math.floor(seuilNiveau(L - 1) + frac * (seuilNiveau(L) - seuilNiveau(L - 1)));
+}
+function debutJeu() {
+  const cles = Object.keys(S.jours).sort();
+  const cree = iso(new Date(S.cree));
+  return cles.length && cles[0] < cree ? cles[0] : cree;
+}
+
+function stats() {
+  const st = { xp: 0, parCat: { force: 0, savoir: 0, esprit: 0, vitalite: 0, discipline: 0 },
+    xpCat: { force: 0, savoir: 0, esprit: 0, vitalite: 0, discipline: 0 },
+    quetes: 0, surprises: 0, pages: 0, parfaits: 0, notes: 0, lecons: 0, serie: 0, record: 0, recordParfait: 0, penalites: [] };
+  const auj = aujourdhui();
+  let serie = 0, serieP = 0, enEchec = false;
+  for (let k = debutJeu(); k <= auj; k = decale(k, 1)) {
+    const j = S.jours[k];
+    if (j) {
+      for (const [id, g] of Object.entries(j.gains)) {
+        st.xp += g.xp;
+        if (id === "_coffre") continue;
+        if (g.cat && st.parCat[g.cat] != null) { st.parCat[g.cat]++; st.xpCat[g.cat] += g.xp; }
+        if (id === "_surprise") st.surprises++; else st.quetes++;
+      }
+      for (const [id, v] of Object.entries(j.q)) {
+        const q = queteId(id);
+        if (q && q.type === "compteur" && /page/i.test(q.unite || "")) st.pages += Number(v) || 0;
+      }
+      st.lecons += j.lecOk || 0;
+      if ((j.note || "").trim()) st.notes++;
+    }
+    if (jourSansQuete(k)) continue;
+    const b = bilanJour(k), ok = reussi(k), parfait = b.total > 0 && b.ratio >= 1;
+    if (parfait) st.parfaits++;
+    if (k === auj) { // aujourd'hui n'est jugé qu'une fois terminé
+      if (ok) serie++;
+      if (parfait) serieP++;
+    } else if (ok) {
+      serie++; enEchec = false;
+      serieP = parfait ? serieP + 1 : 0;
+    } else {
+      serie = 0; serieP = 0;
+      if (k >= S.depuis && (!enEchec || S.params.penalite === "jour")) {
+        const avantL = niveauDe(st.xp);
+        st.xp = perdreNiveau(st.xp);
+        st.penalites.push({ k, de: avantL, a: niveauDe(st.xp), faites: b.faites, total: b.total });
+      }
+      enEchec = true;
+    }
+    st.record = Math.max(st.record, serie);
+    st.recordParfait = Math.max(st.recordParfait, serieP);
+  }
+  st.serie = serie;
+  st.niveau = niveauDe(st.xp);
+  return st;
+}
+
+// ------------------------------------------------------------------ leçons
+function normaliser(t) {
+  return String(t).toLowerCase().replace(/œ/g, "oe").replace(/æ/g, "ae").normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[’'`]/g, " ").replace(/[^a-z0-9.,\- ]/g, " ").replace(/\s+/g, " ").trim()
+    .replace(/^(le|la|les|l|un|une|des|du|de|d|en|au|aux|c est|cest|il s agit de) /, "").trim();
+}
+function enNombre(t) {
+  const s = String(t).replace(/\s/g, "").replace(",", ".").replace(/[^0-9.\-]/g, "");
+  return s && /\d/.test(s) && !isNaN(Number(s)) ? Number(s) : null;
+}
+function reponseJuste(saisie, lecon) {
+  const n = enNombre(saisie), ns = normaliser(saisie);
+  if (!ns) return false;
+  for (const r of lecon.r) {
+    const nr = enNombre(r);
+    if (nr != null && /^[\d\s.,\-]+$/.test(String(r).trim())) {
+      if (n != null && Math.abs(n - nr) <= (lecon.tol || 0) + 1e-9) return true;
+    } else if (ns === normaliser(r)) return true;
+  }
+  return false;
+}
+function leconParId(id) {
+  if (!id) return null;
+  if (id.startsWith("calc:")) return genererCalcul(Number(id.slice(5)));
+  return LECONS.find(l => l.id === id) || null;
+}
+function nouvelleLecon(k) {
+  const j = jour(k);
+  const mats = S.params.matieres.length ? S.params.matieres : ["calcul"];
+  const n = j.lecSeq || 0;
+  j.lecSeq = n + 1;
+  const m = mats[(hash(k) + n) % mats.length];
+  let id;
+  if (m === "calcul") id = "calc:" + hash(k + ":" + n);
+  else {
+    let pool = LECONS.filter(l => l.m === m && !S.lecVues.includes(l.id));
+    if (!pool.length) { // toutes vues : on recommence cette matière
+      S.lecVues = S.lecVues.filter(v => !LECONS.some(l => l.id === v && l.m === m));
+      pool = LECONS.filter(l => l.m === m);
+    }
+    id = pool[hash(k + "#" + n) % pool.length].id;
+  }
+  j.lecon = { id, essais: 0, etat: "question", saisie: "" };
+  return j.lecon;
+}
+function verifierLecon(qid, saisie, ev) {
+  const k = aujourdhui(), j = jour(k), q = queteId(qid), cur = j.lecon, l = leconParId(cur && cur.id);
+  if (!l || cur.etat !== "question") return;
+  cur.saisie = saisie;
+  if (!String(saisie).trim()) { cur.message = "Écris ta réponse avant de vérifier."; rendreFeuille(); return; }
+  memoriser();
+  if (reponseJuste(saisie, l)) {
+    cur.etat = "juste"; cur.message = "";
+    j.lecOk = (j.lecOk || 0) + 1;
+    if (!l.id.startsWith("calc:") && !S.lecVues.includes(l.id)) S.lecVues.push(l.id);
+    if (q) {
+      j.q[qid] = (Number(j.q[qid]) || 0) + 1;
+      if (!j.liste.includes(qid)) j.liste.push(qid);
+      if (estFaite(q, j.q[qid]) && !j.gains[qid]) { j.gains[qid] = { xp: q.xp, cat: q.cat }; flotte(ev, "+" + q.xp + " XP"); }
+    }
+    son("quete");
+  } else {
+    cur.essais++;
+    j.lecKo = (j.lecKo || 0) + 1;
+    if (cur.essais >= ESSAIS_LECON) {
+      cur.etat = "revele"; cur.message = "";
+      if (!l.id.startsWith("calc:") && !S.lecVues.includes(l.id)) S.lecVues.push(l.id);
+    } else {
+      cur.message = `Ce n'est pas la bonne réponse. Relis la leçon et réessaie (${ESSAIS_LECON - cur.essais} essai${ESSAIS_LECON - cur.essais > 1 ? "s" : ""} restant${ESSAIS_LECON - cur.essais > 1 ? "s" : ""}).`;
+      son("erreur");
+    }
+  }
+  apres();
+}
+
+// ------------------------------------------------------------------ actions sur les quêtes
+let avant = null;
+function memoriser() { if (!avant) avant = { niveau: stats().niveau }; }
+function gagner(j, id, q) { j.gains[id] = { xp: q.xp, cat: q.cat }; }
+function basculer(id, ev, k) {
+  k = k || aujourdhui();
+  const j = jour(k), q = queteId(id);
+  if (!q || q.contenu === "lecon") return;
+  memoriser();
+  if (j.gains[id]) { delete j.gains[id]; delete j.q[id]; }
+  else {
+    j.q[id] = q.type === "compteur" ? q.objectif : true;
+    gagner(j, id, q);
+    if (k === aujourdhui()) { flotte(ev, "+" + q.xp + " XP"); son("quete"); }
+  }
+  if (!j.liste.includes(id)) j.liste.push(id);
+  apres();
+}
+function compter(id, sens, ev, k) {
+  k = k || aujourdhui();
+  const j = jour(k), q = queteId(id);
+  if (!q || q.contenu === "lecon") return;
+  memoriser();
+  const v = Math.max(0, Math.min((q.objectif || 1) * 5, (Number(j.q[id]) || 0) + sens * (q.pas || 1)));
+  if (v > 0) j.q[id] = v; else delete j.q[id];
+  const fait = estFaite(q, v);
+  if (fait && !j.gains[id]) { gagner(j, id, q); if (k === aujourdhui()) { flotte(ev, "+" + q.xp + " XP"); son("quete"); } }
+  if (!fait && j.gains[id]) delete j.gains[id];
+  if (!j.liste.includes(id)) j.liste.push(id);
+  apres();
+}
+function surpriseFaite(ev) {
+  const j = jour(aujourdhui()), s = surpriseDu(aujourdhui());
+  if (!s) return;
+  memoriser();
+  if (j.gains._surprise) delete j.gains._surprise;
+  else { j.gains._surprise = { xp: s.xp, cat: s.cat }; flotte(ev, "+" + s.xp + " XP"); son("quete"); }
+  apres();
+}
+function changerSurprise() {
+  const j = jour(aujourdhui());
+  if (!j.surprise || j.surprise.change >= 1 || j.gains._surprise) return;
+  j.surprise.i = (j.surprise.i + 7 + (hash(aujourdhui() + "x") % (SURPRISES.length - 8))) % SURPRISES.length;
+  j.surprise.change++;
+  sauver(); rendre();
+}
+function ouvrirCoffre() {
+  const k = aujourdhui(), j = jour(k), b = bilanJour(k);
+  if (j.coffre || !b.total || b.faites < b.total) return;
+  memoriser();
+  j.coffre = true;
+  j.gains._coffre = { xp: BONUS_COFFRE, cat: null };
+  son("coffre");
+  celebrer({ grand: "+" + BONUS_COFFRE + " XP", moyen: "Coffre du jour ouvert", texte: "Toutes les quêtes du jour sont accomplies. Bravo !", icone: "coffre" });
+  apres(true);
+}
+function apres(differer) {
+  sauver();
+  const st = stats();
+  for (const h of HAUTS_FAITS) {
+    if (!S.succes[h.id] && h.v(st) >= h.max) { S.succes[h.id] = aujourdhui(); toast("Haut fait débloqué : " + h.nom, h.desc); }
+  }
+  sauver();
+  if (avant && st.niveau > avant.niveau) {
+    const c = () => { son("niveau"); celebrer({ grand: "Niveau " + st.niveau, moyen: titreDe(st.niveau), texte: "Tu montes de niveau. Continue sur cette lancée !", icone: "bouclier" }); };
+    if (differer) setTimeout(c, 2600); else c();
+  }
+  avant = null;
+  rendre();
+}
+
+// ------------------------------------------------------------------ effets
+let audio = null;
+function son(type) {
+  if (!S.params.son) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = { niveau: [523, 659, 784, 1047], coffre: [392, 523, 659, 784], fin: [880, 660, 880, 1175], erreur: [330, 247], perte: [392, 330, 262] }[type] || [660, 990];
+    const t0 = audio.currentTime;
+    notes.forEach((f, i) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = type === "erreur" || type === "perte" ? "sine" : "triangle"; o.frequency.value = f;
+      const t = t0 + i * 0.1;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.14, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+      o.connect(g); g.connect(audio.destination);
+      o.start(t); o.stop(t + 0.34);
+    });
+  } catch (e) { /* son indisponible */ }
+}
+function flotte(ev, texte) {
+  const el = document.createElement("div");
+  el.className = "flotte";
+  el.textContent = texte;
+  const r = ev && ev.target && ev.target.closest ? ev.target.closest("button,.quete") : null;
+  const b = r ? r.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0 };
+  el.style.left = (b.left + b.width / 2) + "px";
+  el.style.top = (b.top - 6) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+let fileToasts = Promise.resolve();
+function toast(titre, texte) { fileToasts = fileToasts.then(() => new Promise(fin => { afficherToast(titre, texte); setTimeout(fin, 3300); })); }
+function afficherToast(titre, texte) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.setAttribute("role", "status");
+  el.innerHTML = `${ic("etoile", "var(--or)", 26)}<div><b>${esc(titre)}</b><span>${esc(texte)}</span></div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3700);
+}
+function celebrer({ grand, moyen, texte, icone, defaite }) {
+  const el = document.createElement("div");
+  el.className = "celebration" + (defaite ? " defaite" : "");
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", grand);
+  let eclats = "";
+  if (!defaite) {
+    const couleurs = ["var(--or)", "var(--force)", "var(--savoir)", "var(--esprit)", "var(--vitalite)", "var(--discipline)"];
+    for (let i = 0; i < 36; i++) {
+      const a = (i / 36) * Math.PI * 2, d = 120 + (i * 37) % 120;
+      eclats += `<i class="etincelle" style="background:${couleurs[i % couleurs.length]};--dx:${Math.round(Math.cos(a) * d)}px;--dy:${Math.round(Math.sin(a) * d)}px;animation-delay:${(i % 6) * 0.03}s"></i>`;
+    }
+  }
+  el.innerHTML = `${defaite ? "" : '<div class="rayons"></div>'}${eclats}<div class="${defaite ? "chute" : "coffre-anim"}">${ic(icone, defaite ? "var(--rouge)" : "var(--or)", 64, 1.6)}</div>
+    <div class="grand">${esc(grand)}</div><div class="moyen">${esc(moyen)}</div><p>${esc(texte)}</p>
+    <button class="btn-or" data-a="fermer-celebration">${defaite ? "Je relève le défi" : "Continuer"}</button>`;
+  document.body.appendChild(el);
+  el.querySelector("button").focus();
+}
+function annoncerPenalites() {
+  const st = stats();
+  if (st.penalites.length > S.penalitesVues) {
+    const p = st.penalites[st.penalites.length - 1], n = st.penalites.length - S.penalitesVues;
+    S.penalitesVues = st.penalites.length;
+    sauver();
+    son("perte");
+    const perdus = st.penalites.slice(-n).reduce((s, x) => s + (x.de - x.a), 0);
+    celebrer({ defaite: true, icone: "bouclierBrise", grand: perdus ? "−" + pluriel(perdus, "niveau") : "XP perdue",
+      moyen: n > 1 ? "Série rompue " + n + " fois" : "Série rompue",
+      texte: `${majuscule(dateLongue(p.k))} : ${p.faites} quête${p.faites > 1 ? "s" : ""} sur ${p.total}, il en fallait ${Math.ceil(p.total * S.params.seuil - 1e-9)}. ` +
+        (perdus ? `Tu es maintenant niveau ${st.niveau} (${titreDe(st.niveau)}). Remonte la pente dès aujourd'hui !` : "Ton expérience du niveau 1 est remise à zéro.") });
+  }
+}
+
+// ------------------------------------------------------------------ minuteur (séances)
+let MINUTEUR = null, verrou = null;
+function lancerMinuteur(sec, label) {
+  MINUTEUR = { fin: Date.now() + sec * 1000, label };
+  try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(v => { verrou = v; }).catch(() => {}); } catch (e) { /* facultatif */ }
+  majMinuteur();
+}
+function arreterMinuteur() { MINUTEUR = null; try { if (verrou) verrou.release(); } catch (e) { /* rien */ } verrou = null; majMinuteur(); }
+function majMinuteur() {
+  const el = document.getElementById("minuteur");
+  if (!MINUTEUR) { if (el) el.hidden = true; return; }
+  const reste = Math.max(0, Math.ceil((MINUTEUR.fin - Date.now()) / 1000));
+  if (el) {
+    el.hidden = false;
+    el.querySelector("b").textContent = Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0");
+    el.querySelector("span").textContent = MINUTEUR.label;
+  }
+  if (reste === 0) { const l = MINUTEUR.label; arreterMinuteur(); son("fin"); toast("Temps écoulé", l); }
+}
+setInterval(majMinuteur, 250);
+
+// ------------------------------------------------------------------ navigation et rendu
+let VUE = "quetes", JOUR_SEL = null, MOIS_VU = null, EDITION = null, CONFIRMER = null, SAUVEGARDE_TXT = "", IMPORT_MSG = "";
+let FEUILLE = null; // proposition ouverte : { qid }
+
+const racine = document.getElementById("app");
+const nav = document.getElementById("nav");
+function rendre() {
+  const vues = { quetes: vueQuetes, heros: vueHeros, journal: vueJournal, reglages: vueReglages };
+  racine.innerHTML = vues[VUE]();
+  nav.innerHTML = `<div class="interne gouttiere">${[["quetes", "Quêtes", "epee"], ["heros", "Héros", "bouclier"], ["journal", "Journal", "calendrier"], ["reglages", "Réglages", "reglages"]]
+    .map(([v, t, i]) => `<button data-a="vue" data-v="${v}" ${VUE === v ? 'aria-current="page"' : ""}>${ic(i, "currentColor", 22)}${t}</button>`).join("")}</div>`;
+  if (EDITION) rendreEditeur();
+  if (FEUILLE) rendreFeuille();
+}
+function salut() { const h = new Date().getHours(); return h < 5 ? "Bonne nuit" : h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"; }
+
+function enteteHeros(st) {
+  const L = st.niveau, bas = seuilNiveau(L), haut = seuilNiveau(L + 1);
+  const pct = Math.min(100, Math.round(100 * (st.xp - bas) / (haut - bas)));
+  const pt = prochainTitre(L), k = aujourdhui(), b = bilanJour(k), il_faut = besoin(k);
+  const protege = b.total === 0 || b.faites >= il_faut;
+  const manque = Math.max(0, il_faut - b.faites);
+  return `<header class="entete gouttiere">
+    <div class="ligne-heros">
+      <div class="blason" aria-label="Niveau ${L}"><small>Niv.</small><b class="num">${L}</b></div>
+      <div class="qui"><span>${salut()}${S.nom ? ", " + esc(S.nom) : ""}</span><h1>${esc(titreDe(L))}</h1></div>
+      <button class="garde ${protege ? "ok" : ""}" data-a="vue" data-v="heros" aria-label="${protege ? "Niveau protégé aujourd'hui" : "Niveau en jeu aujourd'hui"}">
+        ${ic(protege ? "bouclierOk" : "bouclier", protege ? "var(--vitalite)" : "var(--rouge)", 20)}<span class="num">${b.faites}/${il_faut}</span></button>
+    </div>
+    <div class="xp">
+      <div class="xp-haut"><span>Expérience</span><span class="num"><strong>${nf(st.xp - bas)}</strong> / ${nf(haut - bas)} XP</span></div>
+      <div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>
+      <span class="xp-bas">Encore ${nf(haut - st.xp)} XP avant le niveau ${L + 1}${pt && pt[0] === L + 1 ? " : « " + pt[1] + " »" : ""}</span>
+    </div>
+    ${b.total ? `<div class="enjeu ${protege ? "ok" : ""}">${protege
+      ? `${ic("bouclierOk", "var(--vitalite)", 18)}<span>Niveau protégé pour aujourd'hui. Chaque quête en plus rapporte de l'XP.</span>`
+      : `${ic("bouclier", "var(--rouge)", 18)}<span>Encore <b>${pluriel(manque, "quête")}</b> aujourd'hui, sinon tu perds un niveau à minuit.</span>`}</div>` : ""}
+  </header>`;
+}
+
+function carteQuete(q, j) {
+  const v = j.q[q.id], fait = !!j.gains[q.id], cat = CATS[q.cat] || CATS.discipline;
+  const rarete = q.xp >= 80 ? "epique" : q.xp >= 60 ? "rare" : "";
+  const aProposition = !!q.contenu;
+  const ouvrable = q.contenu === "lecon" || q.contenu === "chapelet";
+  let controle, sousTexte = esc(q.detail || "");
+  if (q.type === "compteur") sousTexte = `${Number(v) || 0} / ${q.objectif || 1} ${esc(q.unite || "")}${q.detail ? " · " + esc(q.detail) : ""}`;
+  if (ouvrable) {
+    controle = fait ? `<button class="coche" data-a="ouvrir" data-id="${q.id}" aria-label="Quête ${esc(q.nom)} accomplie, revoir">${ic("coche", "var(--sur-or)", 16, 3)}</button>`
+      : `<button class="btn-mini" data-a="ouvrir" data-id="${q.id}">${(Number(v) || 0) ? "Continuer" : "Commencer"}</button>`;
+  } else if (q.type === "compteur") {
+    controle = `<div class="compteur">
+      <button data-a="moins" data-id="${q.id}" aria-label="Retirer ${q.pas || 1} ${esc(q.unite || "")} à ${esc(q.nom)}">${ic("moins", "currentColor", 16, 2.5)}</button>
+      <button data-a="plus" data-id="${q.id}" aria-label="Ajouter ${q.pas || 1} ${esc(q.unite || "")} à ${esc(q.nom)}" ${fait ? 'class="plein"' : ""}>${ic(fait ? "coche" : "plus", "currentColor", 16, 2.5)}</button></div>`;
+  } else {
+    controle = `<button class="coche" data-a="basculer" data-id="${q.id}" aria-pressed="${fait}" aria-label="${fait ? "Annuler" : "Valider"} la quête ${esc(q.nom)}">${fait ? ic("coche", "var(--sur-or)", 16, 3) : ""}</button>`;
+  }
+  const barre = q.type === "compteur" ? `<div class="mini"><i style="width:${Math.min(100, Math.round(100 * (Number(v) || 0) / (q.objectif || 1)))}%"></i></div>` : "";
+  const actionCorps = aProposition ? "ouvrir" : (q.type === "compteur" ? "plus" : "basculer");
+  return `<div class="quete ${fait ? "fait" : rarete}">
+    <div class="tuile" style="background:${cat.f}">${ic(q.icone, cat.c, 20)}</div>
+    <button class="corps" data-a="${actionCorps}" data-id="${q.id}" ${aProposition ? "" : 'tabindex="-1" aria-hidden="true"'}>
+      <span class="nom">${esc(q.nom)}${rarete && !fait ? ` <span class="tag ${rarete}">${rarete === "epique" ? "Épique" : "Rare"}</span>` : ""}</span>
+      <span class="detail">${cat.nom} · ${sousTexte}</span>${barre}
+      ${aProposition && !fait ? `<span class="proposition">${ic("lecture", "currentColor", 12, 2.4)} ${q.contenu === "lecon" ? "Ouvrir la leçon" : "Proposition du jour"}</span>` : ""}
+    </button>
+    <span class="gain num">+${q.xp}</span>
+    ${controle}
+  </div>`;
+}
+
+function vueQuetes() {
+  const st = stats(), k = aujourdhui(), j = jour(k), b = bilanJour(k);
+  const quetes = j.liste.map(queteId).filter(Boolean);
+  let html = enteteHeros(st) + `<div class="vue gouttiere">`;
+  html += `<div class="titre-section"><h2>Quêtes du jour</h2><span class="num"><strong>${b.faites}</strong> / ${b.total} accomplies</span></div>`;
+  if (!quetes.length) {
+    html += `<div class="vide">${ic("lune", "var(--doux)", 32)}<b>Jour de repos</b><span>Aucune quête prévue aujourd'hui.</span>
+      <button class="btn" data-a="vue" data-v="reglages">Gérer mes quêtes</button></div>`;
+  } else {
+    for (const m of Object.keys(MOMENTS)) {
+      const qs = quetes.filter(q => (q.moment || "libre") === m);
+      if (qs.length) html += `<div class="moment">${MOMENTS[m]}</div><div class="liste">${qs.map(q => carteQuete(q, j)).join("")}</div>`;
+    }
+  }
+  const s = surpriseDu(k);
+  if (s) {
+    const cat = CATS[s.cat];
+    html += `<div class="quete surprise ${s.fait ? "fait" : ""}">
+      <div class="tuile" style="background:${cat.f}">${ic(s.icone, cat.c, 20)}</div>
+      <div class="corps"><span class="etiquette">Quête surprise · bonus</span><span class="nom">${esc(s.nom)}</span>
+        <span class="detail">${cat.nom}${!s.fait && s.change < 1 ? ` · <button class="lien-bouton" data-a="changer-surprise">en tirer une autre</button>` : ""}</span></div>
+      <span class="gain num">+${s.xp}</span>
+      <button class="coche" data-a="surprise" aria-pressed="${s.fait}" aria-label="${s.fait ? "Annuler" : "Valider"} la quête surprise">${s.fait ? ic("coche", "var(--sur-or)", 16, 3) : ""}</button>
+    </div>`;
+  }
+  if (b.total) {
+    const reste = b.total - b.faites;
+    if (j.coffre) html += `<div class="coffre">${ic("coffre", "var(--or)", 28, 1.8)}<div class="txt"><b>Coffre du jour ouvert</b><span>+${BONUS_COFFRE} XP gagnés. À demain pour le suivant !</span></div></div>`;
+    else if (reste === 0) html += `<div class="coffre pret">${ic("coffre", "var(--or)", 28, 1.8)}<div class="txt"><b>Le coffre est prêt</b><span>Toutes les quêtes sont accomplies.</span></div><button class="btn-or" data-a="coffre">Ouvrir</button></div>`;
+    else html += `<div class="coffre">${ic("coffre", "var(--or)", 28, 1.8)}<div class="txt"><b>Coffre du jour</b><span>Termine toutes les quêtes : +${BONUS_COFFRE} XP bonus</span></div><span class="gain num">${reste} restante${reste > 1 ? "s" : ""}</span></div>`;
+  }
+  return html + `</div>`;
+}
+
+function vueHeros() {
+  const st = stats(), L = st.niveau;
+  let html = `<header class="portrait gouttiere">
+    <div class="embleme">${ic("bouclier", "var(--or)", 52, 1.5)}<b class="num">${L}</b></div>
+    <h1>${esc(S.nom || "Héros")}</h1>
+    <span class="sous num">Niveau ${L} · ${esc(titreDe(L))} · ${nf(st.xp)} XP</span>
+    <div class="pilules"><span class="pilule">${pluriel(st.serie, "jour")} réussi${st.serie > 1 ? "s" : ""} de suite</span>
+      <span class="pilule" style="color:${st.penalites.length ? "var(--rouge)" : "var(--doux)"}">${pluriel(st.penalites.length, "niveau")} perdu${st.penalites.length > 1 ? "s" : ""}</span></div>
+  </header><div class="vue gouttiere">`;
+  html += `<div class="carte regle">${ic("bouclierBrise", "var(--rouge)", 22)}<p>Règle du jeu : accomplis au moins ${Math.round(S.params.seuil * 100)} % de tes quêtes chaque jour.
+    Sinon, tu perds un niveau${S.params.penalite === "jour" ? " par jour manqué" : " (plusieurs jours manqués d'affilée ne coûtent qu'un niveau)"}.</p></div>`;
+  html += `<h2 class="or">Caractéristiques</h2><div class="stats">`;
+  for (const [id, c] of Object.entries(CATS)) {
+    const xp = st.xpCat[id], pts = 1 + Math.floor(xp / 100), pct = xp % 100;
+    html += `<div class="stat"><div class="h"><span>${c.nom}</span><b class="num" style="color:${c.c}">${pts}</b></div>
+      <div class="b"><i style="width:${pct}%;background:${c.c}"></i></div><small>${c.aide} · ${pluriel(st.parCat[id], "quête")}</small></div>`;
+  }
+  html += `</div><h2 class="or">Hauts faits</h2><div class="badges">`;
+  const tries = [...HAUTS_FAITS].sort((a, b) => (S.succes[b.id] ? 1 : 0) - (S.succes[a.id] ? 1 : 0));
+  for (const h of tries) {
+    const ok = !!S.succes[h.id];
+    html += ok ? `<div class="badge">${ic(h.ic, "var(--or)", 30, 1.8)}<b>${esc(h.nom)}</b><small>${esc(h.desc)}</small></div>`
+      : `<div class="badge verrou">${ic("cadenas", "#6E7390", 30, 1.8)}<b>${esc(h.nom)}</b><small class="num">${nf(Math.min(h.v(st), h.max))} / ${nf(h.max)}</small></div>`;
+  }
+  html += `</div>`;
+  const auj = aujourdhui(), lundi = decale(auj, -jourSemaine(auj));
+  let barres = "", tot = 0, faites = 0;
+  for (let i = 0; i < 7; i++) {
+    const k = decale(lundi, i), b = bilanJour(k);
+    if (k <= auj) { tot += b.total; faites += b.faites; }
+    barres += k > auj ? `<i class="futur" style="height:6%"></i>` : `<i class="${k < auj && !jourSansQuete(k) && !reussi(k) ? "rate" : ""}" style="height:${Math.max(4, Math.round(100 * b.ratio))}%" title="${b.faites}/${b.total}"></i>`;
+  }
+  html += `<div class="carte"><div class="h"><b>Cette semaine</b><span class="num">${faites} / ${tot} quêtes</span></div>
+    <div class="semaine">${barres}</div><div class="jours7">${JOURS_COURTS.map(x => `<span>${x}</span>`).join("")}</div></div>`;
+  html += `<div class="carte"><div class="chiffres">
+    <div><b class="num">${nf(st.quetes)}</b><span>quêtes accomplies</span></div>
+    <div><b class="num">${nf(st.lecons)}</b><span>bonnes réponses</span></div>
+    <div><b class="num">${nf(st.record)}</b><span>meilleure série</span></div></div></div>`;
+  return html + `</div>`;
+}
+
+function anneau(ratio, parfait, rate) {
+  const r = 15, c = 2 * Math.PI * r;
+  if (parfait) return `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="16" fill="var(--or)"/></svg>`;
+  return `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="${r}" fill="none" stroke="${rate ? "var(--rouge-f)" : "var(--releve)"}" stroke-width="3"/>
+    ${ratio > 0 ? `<circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--or)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${(ratio * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 18 18)"/>` : ""}</svg>`;
+}
+function vueJournal() {
+  const auj = aujourdhui(), st = stats();
+  const penal = new Set(st.penalites.map(p => p.k));
+  if (!MOIS_VU) MOIS_VU = auj.slice(0, 7);
+  if (!JOUR_SEL) JOUR_SEL = auj;
+  const [a, m] = MOIS_VU.split("-").map(Number);
+  const decal = jourSemaine(`${MOIS_VU}-01`), nbJours = new Date(a, m, 0).getDate(), debut = debutJeu();
+  let html = `<div class="vue gouttiere"><div class="mois"><button class="rond" data-a="mois" data-s="-1" aria-label="Mois précédent">${ic("gauche")}</button>
+    <h1>${majuscule(MOIS[m - 1])} ${a}</h1>
+    <button class="rond" data-a="mois" data-s="1" aria-label="Mois suivant" ${MOIS_VU >= auj.slice(0, 7) ? "disabled" : ""}>${ic("droite")}</button></div>
+    <div class="cal">${JOURS_COURTS.map(x => `<span class="jsem">${x}</span>`).join("")}`;
+  for (let i = 0; i < decal; i++) html += `<span></span>`;
+  for (let d = 1; d <= nbJours; d++) {
+    const k = `${MOIS_VU}-${String(d).padStart(2, "0")}`, futur = k > auj, avantJeu = k < debut;
+    const b = futur || avantJeu ? { ratio: 0, total: 0 } : bilanJour(k), parfait = b.total > 0 && b.ratio >= 1;
+    html += `<button class="jour ${k === auj ? "auj" : ""} ${k === JOUR_SEL ? "sel" : ""} ${futur || avantJeu ? "hors" : ""} ${parfait ? "parfait" : ""} ${penal.has(k) ? "penal" : ""}"
+      data-a="jour" data-k="${k}" ${futur || avantJeu ? "disabled" : ""}
+      aria-label="${dateLongue(k)}${futur || avantJeu ? "" : ", " + Math.round(b.ratio * 100) + " %"}${penal.has(k) ? ", niveau perdu" : ""}">${futur || avantJeu ? "" : anneau(b.ratio, parfait, penal.has(k))}<span class="num">${d}</span></button>`;
+  }
+  html += `</div><p class="note legende"><i class="pt or"></i> journée parfaite <i class="pt rouge"></i> niveau perdu</p>`;
+  const k = JOUR_SEL, j = jour(k), b = bilanJour(k), p = st.penalites.find(x => x.k === k);
+  html += `<div class="carte"><div class="h"><b>${majuscule(dateLongue(k))}</b><span class="num">${b.faites} / ${b.total} · +${nf(b.xp)} XP</span></div>`;
+  if (p) html += `<p class="note alerte">${ic("bouclierBrise", "var(--rouge)", 16)} Série rompue ce jour-là : niveau ${p.de} → ${p.a}.</p>`;
+  if (k !== auj) html += `<p class="note" style="margin:0">Tu peux corriger une quête oubliée. Les leçons, elles, ne se valident qu'en répondant juste le jour même.</p>`;
+  html += `<div>`;
+  const ids = j.liste.length ? j.liste : prevues(k).map(q => q.id);
+  for (const id of ids) {
+    const q = queteId(id);
+    if (!q) continue;
+    const fait = !!j.gains[id];
+    const val = q.type === "compteur" ? `${Number(j.q[id]) || 0} / ${q.objectif} ${esc(q.unite || "")}` : "";
+    const verrouille = q.contenu === "lecon";
+    html += `<div class="ligne-jour">${ic(q.icone, (CATS[q.cat] || CATS.discipline).c, 18)}<span class="n">${esc(q.nom)} <span class="x">${val}</span></span>
+      ${verrouille ? `<span class="coche petite ${fait ? "on" : ""}" aria-label="${fait ? "Réussie" : "Non réussie"}">${fait ? ic("coche", "var(--sur-or)", 14, 3) : ""}</span>`
+        : `<button class="coche petite" data-a="basculer-jour" data-id="${id}" aria-pressed="${fait}" aria-label="${fait ? "Annuler" : "Valider"} ${esc(q.nom)}">${fait ? ic("coche", "var(--sur-or)", 14, 3) : ""}</button>`}</div>`;
+  }
+  if (!ids.length) html += `<p class="note">Aucune quête prévue ce jour-là.</p>`;
+  html += `</div></div>`;
+  html += `<div class="carte"><div class="champ"><label for="note-jour">Ce que je retiens de cette journée</label>
+    <textarea id="note-jour" data-k="${k}" placeholder="Une victoire, une difficulté, une idée pour demain…">${esc(j.note)}</textarea></div>
+    <div class="champ"><span class="lab">Humeur</span><div class="puces">${["Rayonnante", "Bonne", "Neutre", "Fatiguée", "Difficile"].map(h =>
+      `<button class="puce ${j.humeur === h ? "on" : ""}" data-a="humeur" data-h="${h}" aria-pressed="${j.humeur === h}">${h}</button>`).join("")}</div></div>
+    <div class="champ"><span class="lab">Énergie</span><div class="puces">${["Haute", "Moyenne", "Basse"].map(h =>
+      `<button class="puce ${j.energie === h ? "on" : ""}" data-a="energie" data-h="${h}" aria-pressed="${j.energie === h}">${h}</button>`).join("")}</div></div></div>`;
+  return html + `</div>`;
+}
+
+// ------------------------------------------------------------------ propositions du jour
+function ouvrirFeuille(qid) { FEUILLE = { qid }; rendreFeuille(); }
+function fermerFeuille() { FEUILLE = null; arreterMinuteur(); const f = document.getElementById("feuille"); if (f) f.remove(); rendre(); }
+function rendreFeuille() {
+  const q = queteId(FEUILLE.qid);
+  if (!q) { FEUILLE = null; return; }
+  const k = aujourdhui(), j = jour(k), fait = !!j.gains[q.id];
+  const corps = { priere_matin: feuillePriere, priere_soir: feuillePriere, chapelet: feuilleChapelet, exercices: feuilleExercices,
+    course: feuilleCourse, lecture: feuilleLecture, lecon: feuilleLecon }[q.contenu] || feuillePriere;
+  let el = document.getElementById("feuille");
+  if (!el) { // la coque n'est créée qu'une fois : pas d'animation à chaque mise à jour
+    el = document.createElement("div"); el.id = "feuille";
+    el.innerHTML = `<div class="voile" data-a="fermer-feuille-fond"><div class="feuille gouttiere grande" role="dialog" aria-modal="true" aria-labelledby="titre-feuille"></div></div>`;
+    document.body.appendChild(el);
+  }
+  const f = el.querySelector(".feuille"), garderDefilement = f.scrollTop;
+  const cat = CATS[q.cat] || CATS.discipline;
+  f.innerHTML = `<div class="tete-feuille"><div class="tuile" style="background:${cat.f}">${ic(q.icone, cat.c, 20)}</div>
+      <div class="t"><h2 id="titre-feuille">${esc(q.nom)}</h2><span>${esc(majuscule(dateLongue(k)))} · +${q.xp} XP</span></div>
+      <button class="icone-btn" data-a="fermer-feuille" aria-label="Fermer">${ic("croixFermer", "currentColor", 18)}</button></div>
+    <div id="minuteur" class="minuteur" hidden><b class="num">0:00</b><span></span><button class="btn" data-a="stop-minuteur">Arrêter</button></div>
+    ${corps(q, j, k, fait)}`;
+  f.scrollTop = garderDefilement;
+  majMinuteur();
+}
+function boutonValider(q, fait, texte) {
+  return fait ? `<div class="bandeau-ok">${ic("coche", "var(--vitalite)", 18, 3)} Quête accomplie. Bravo !</div>`
+    : `<button class="btn-or large" data-a="valider-feuille" data-id="${q.id}">${texte}</button>`;
+}
+function bloc(titre, texte, cls = "") { return `<section class="bloc ${cls}"><h3>${esc(titre)}</h3><p>${esc(texte).replace(/\n/g, "<br>")}</p></section>`; }
+
+function feuillePriere(q, j, k, fait) {
+  const n = numJour(k);
+  if (q.contenu === "priere_soir") {
+    const p = PRIERES_SOIR[n % PRIERES_SOIR.length];
+    return `<p class="note">Prends un moment au calme, avant de dormir.</p>` + bloc("Signe de croix", P.signe) +
+      `<section class="bloc"><h3>Examen de conscience</h3><ol class="etapes">${EXAMEN.map(e => `<li>${esc(e)}</li>`).join("")}</ol></section>` +
+      bloc(p.titre, p.texte, "fort") + bloc("Je vous salue Marie", P.ave) + bloc("Pour finir", P.remets) +
+      boutonValider(q, fait, "J'ai prié · valider la quête");
+  }
+  const p = PRIERES_MATIN[n % PRIERES_MATIN.length], parole = PAROLES[n % PAROLES.length], intention = INTENTIONS[(n * 5) % INTENTIONS.length];
+  return `<p class="note">Commence la journée avec Dieu : 5 à 10 minutes suffisent.</p>` + bloc("Signe de croix", P.signe) +
+    bloc("Offrande de la journée", P.offrande) + bloc(p.titre, p.texte, "fort") +
+    `<section class="bloc parole"><h3>Parole à méditer</h3><p>« ${esc(parole[0])} »</p><small>${esc(parole[1])}</small></section>` +
+    bloc("Intention du jour", intention) + bloc("Notre Père", P.notrePere) + bloc("Gloire au Père", P.gloire) +
+    boutonValider(q, fait, "J'ai prié · valider la quête");
+}
+
+function feuilleChapelet(q, j, k, fait) {
+  const type = MYSTERES_DU_JOUR[jourSemaine(k)], mysteres = MYSTERES[type];
+  const total = q.objectif || 1;
+  const c = j.chapelet || (j.chapelet = { d: 0, ave: 0, debut: false });
+  const faites = Number(j.q[q.id]) || 0;
+  const premier = total >= 5 ? 0 : numJour(k) % 5; // une dizaine : le mystère change chaque jour
+  let html = `<p class="note">Mystères ${type} (${JOURS_NOMS[jourSemaine(k)]}). ${total === 1 ? "Une dizaine aujourd'hui." : pluriel(total, "dizaine") + " aujourd'hui."}</p>
+    <ol class="mysteres">${mysteres.map((m, i) => {
+      const idx = total >= 5 ? i : (i === premier ? 0 : -1);
+      const etat = idx < 0 ? "" : idx < faites ? "fini" : idx === faites ? "actuel" : "";
+      return `<li class="${etat}">${esc(majuscule(m))}</li>`;
+    }).join("")}</ol>`;
+  if (!c.debut && faites === 0) {
+    html += `<section class="bloc"><h3>Pour commencer</h3><p>Signe de croix, puis le Je crois en Dieu, un Notre Père, trois Je vous salue Marie et un Gloire au Père.</p>
+      <details><summary>Afficher le Je crois en Dieu</summary><p>${esc(P.credo)}</p></details></section>
+      <button class="btn-or large" data-a="chapelet-debut">C'est fait, j'entre dans la première dizaine</button>`;
+    return html;
+  }
+  if (faites >= total) return html + boutonValider(q, true, "");
+  const mystere = total >= 5 ? mysteres[faites] : mysteres[premier];
+  html += `<section class="bloc fort"><h3>Dizaine ${faites + 1}${total > 1 ? " sur " + total : ""} : ${esc(mystere)}</h3>
+    <p>Annonce le mystère, prie un Notre Père, puis dix Je vous salue Marie en méditant la scène.</p></section>
+    <button class="grain" data-a="ave" aria-label="Je vous salue Marie, ${c.ave} sur 10">
+      <span class="num">${c.ave}<small>/10</small></span><em>Je vous salue Marie</em></button>
+    <div class="grains" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${i < c.ave ? "on" : ""}"></i>`).join("")}</div>
+    <details><summary>Le texte du Je vous salue Marie</summary><p>${esc(P.ave)}</p></details>`;
+  if (c.ave >= 10) html += `<section class="bloc"><h3>Gloire au Père</h3><p>${esc(P.gloire)}</p><p class="note">Puis : « Ô mon Jésus, pardonnez-nous nos péchés, préservez-nous du feu de l'enfer, conduisez au ciel toutes les âmes, surtout celles qui ont le plus besoin de votre miséricorde. »</p></section>
+    <button class="btn-or large" data-a="dizaine-finie" data-id="${q.id}">Dizaine terminée</button>`;
+  return html;
+}
+
+function seanceDuJour(k) {
+  const s = SEANCES[jourSemaine(k)], semaine = Math.floor(numJour(k) / 7);
+  const debut = semaine % s.exos.length;
+  const ids = Array.from({ length: Math.min(5, s.exos.length) }, (_, i) => s.exos[(debut + i) % s.exos.length]);
+  return { titre: s.titre, exos: ids.map(id => Object.assign({ id }, EXOS[id])) };
+}
+function feuilleExercices(q, j, k, fait) {
+  const s = seanceDuJour(k), tours = 3, coches = j.seance || {};
+  let html = `<p class="note">Séance « ${esc(s.titre)} » · environ 25 min · ${tours} tours du circuit, 30 s de repos entre les exercices, 90 s entre les tours.</p>
+    <section class="bloc"><h3>Échauffement (4 min)</h3><ul class="liste-simple">${ECHAUFFEMENT.map(([n, d]) => `<li><span>${esc(n)}</span><b>${esc(d)}</b></li>`).join("")}</ul></section>
+    <section class="bloc fort"><h3>Circuit</h3>`;
+  s.exos.forEach((e, i) => {
+    html += `<div class="exo"><div class="exo-t"><b>${esc(e.nom)}</b><span class="num">${e.m === "sec" ? e.v + " s" : e.v + " répétitions"}</span></div>
+      <p>${esc(e.c)}</p><div class="exo-b">${Array.from({ length: tours }, (_, t) => {
+        const cle = i + "_" + t, on = !!coches[cle];
+        return `<button class="tour ${on ? "on" : ""}" data-a="tour" data-c="${cle}" aria-pressed="${on}" aria-label="${esc(e.nom)}, tour ${t + 1}">${t + 1}</button>`;
+      }).join("")}${e.m === "sec" ? `<button class="btn-mini" data-a="minuteur" data-s="${e.v}" data-l="${esc(e.nom)}">${ic("lecture", "currentColor", 12, 2.4)} ${e.v} s</button>` : ""}</div></div>`;
+  });
+  html += `<div class="rangee"><button class="btn" data-a="minuteur" data-s="30" data-l="Repos">Repos 30 s</button><button class="btn" data-a="minuteur" data-s="90" data-l="Repos entre deux tours">Repos 90 s</button></div></section>
+    <section class="bloc"><h3>Retour au calme</h3><ul class="liste-simple">${RETOUR_CALME.map(([n, d]) => `<li><span>${esc(n)}</span><b>${esc(d)}</b></li>`).join("")}</ul></section>
+    <p class="note">Trop facile ? Ajoute 2 répétitions ou 10 secondes. Douleur articulaire : arrête l'exercice.</p>`;
+  return html + boutonValider(q, fait, "Séance terminée · valider la quête");
+}
+function feuilleCourse(q, j, k, fait) {
+  const c = COURSES[numJour(k) % COURSES.length];
+  return `<p class="note">Séance du jour · ${esc(c.duree)}</p>
+    <section class="bloc fort"><h3>${esc(c.titre)}</h3><ol class="etapes">${c.etapes.map(e => `<li>${esc(e)}</li>`).join("")}</ol></section>
+    <div class="rangee"><button class="btn" data-a="minuteur" data-s="600" data-l="Échauffement">Minuteur 10 min</button><button class="btn" data-a="minuteur" data-s="1800" data-l="Course">Minuteur 30 min</button></div>
+    <p class="note">Bois avant et après. En cas de douleur, passe à la marche rapide.</p>` + boutonValider(q, fait, "Séance terminée · valider la quête");
+}
+function feuilleLecture(q, j, k, fait) {
+  const idee = LECTURES[numJour(k) % LECTURES.length], v = Number(j.q[q.id]) || 0;
+  return `<section class="bloc fort"><h3>Idée de lecture</h3><p>${esc(idee)}</p></section>
+    <section class="bloc"><h3>Mes pages aujourd'hui</h3><div class="compteur grand-compteur">
+      <button data-a="moins" data-id="${q.id}" aria-label="Retirer ${q.pas || 1} pages">${ic("moins", "currentColor", 18, 2.5)}</button>
+      <output class="num">${v} / ${q.objectif} ${esc(q.unite || "")}</output>
+      <button data-a="plus" data-id="${q.id}" aria-label="Ajouter ${q.pas || 1} pages">${ic("plus", "currentColor", 18, 2.5)}</button></div></section>` +
+    (fait ? boutonValider(q, true, "") : `<p class="note">La quête est validée dès que tu atteins ${q.objectif} ${esc(q.unite || "pages")}.</p>`);
+}
+function feuilleLecon(q, j, k, fait) {
+  const obj = q.objectif || 1, ok = Number(j.q[q.id]) || 0;
+  if (!j.lecon) nouvelleLecon(k);
+  const cur = j.lecon, l = leconParId(cur.id);
+  let html = `<div class="progres-lecon">${Array.from({ length: obj }, (_, i) => `<i class="${i < ok ? "on" : ""}"></i>`).join("")}<span class="num">${Math.min(ok, obj)} / ${obj} réussies${ok > obj ? " (+" + (ok - obj) + " en bonus)" : ""}</span></div>
+    <section class="bloc lecon"><span class="matiere">${ic(l.m === "calcul" ? "calcul" : l.m === "sciences" ? "flacon" : "livre_ouvert", "currentColor", 14)} ${esc(MATIERES[l.m] || "")}</span>
+      <h3>${esc(l.t)}</h3><p>${esc(l.x)}</p></section>
+    <section class="bloc question"><h3>Question</h3><p class="q">${esc(l.q)}</p>`;
+  if (cur.etat === "question") {
+    html += `<form data-form="lecon" data-id="${q.id}" autocomplete="off"><label for="reponse" class="lab">Ta réponse</label>
+      <div class="ligne-reponse"><input type="text" id="reponse" value="${esc(cur.saisie || "")}" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <button class="btn-or" type="submit">Vérifier</button></div></form>`;
+    if (cur.message) html += `<p class="retour ko" role="alert">${esc(cur.message)}</p>`;
+  } else if (cur.etat === "juste") {
+    html += `<p class="retour ok" role="status">${ic("coche", "var(--vitalite)", 16, 3)} Bonne réponse : ${esc(cur.saisie)}</p>`;
+  } else {
+    html += `<p class="retour ko" role="status">La réponse était : <b>${esc(l.r[0])}</b>. Retiens-la, elle reviendra plus tard.</p>`;
+  }
+  html += `</section>`;
+  if (cur.etat !== "question") {
+    html += fait && ok >= obj ? `<div class="bandeau-ok">${ic("coche", "var(--vitalite)", 18, 3)} Quête « ${esc(q.nom)} » accomplie !</div>
+      <button class="btn large" data-a="lecon-suivante">Encore une leçon (pour le plaisir)</button>`
+      : `<button class="btn-or large" data-a="lecon-suivante">Leçon suivante</button>`;
+  }
+  return html;
+}
+
+function resumeJours(js) {
+  js = js || TOUS;
+  if (js.length === 7) return "Tous les jours";
+  const k = [...js].sort().join(",");
+  if (k === "0,1,2,3,4") return "En semaine";
+  if (k === "5,6") return "Le week-end";
+  return [...js].sort().map(i => JOURS_NOMS[i].slice(0, 3)).join(", ");
+}
+function interrupteur(action, actif, label, id) {
+  return `<button class="interrupteur" role="switch" aria-checked="${!!actif}" aria-label="${esc(label)}" data-a="${action}"${id ? ` data-id="${id}"` : ""}></button>`;
+}
+function vueReglages() {
+  const p = S.params;
+  let html = `<div class="vue gouttiere"><h1 class="page-titre">Réglages</h1>
+    <div class="carte"><div class="champ"><label for="nom-heros">Nom du héros</label><input type="text" id="nom-heros" value="${esc(S.nom)}" maxlength="30" autocomplete="off"></div></div>
+    <div class="titre-section"><h2 style="font-size:17px">Mes quêtes</h2><button class="btn-or" data-a="nouvelle">${ic("plus", "currentColor", 16, 2.5)} Nouvelle</button></div>
+    <div class="carte" style="gap:0">`;
+  S.quetes.forEach((q, i) => {
+    const c = CATS[q.cat] || CATS.discipline;
+    html += `<div class="q-ligne ${q.actif ? "" : "inactive"}">
+      <div class="tuile" style="width:36px;height:36px;background:${c.f}">${ic(q.icone, c.c, 18)}</div>
+      <div class="t"><b>${esc(q.nom)}</b><span>${c.nom} · +${q.xp} XP · ${esc(resumeJours(q.jours))}${q.contenu ? " · " + CONTENUS[q.contenu] : ""}</span></div>
+      <button class="icone-btn" data-a="monter" data-i="${i}" aria-label="Monter ${esc(q.nom)}" ${i === 0 ? "disabled" : ""}>${ic("haut", "currentColor", 16)}</button>
+      <button class="icone-btn" data-a="modifier" data-id="${q.id}" aria-label="Modifier ${esc(q.nom)}">${ic("modifier", "currentColor", 16)}</button>
+      ${interrupteur("activer", q.actif, (q.actif ? "Désactiver " : "Activer ") + q.nom, q.id)}
+    </div>`;
+  });
+  html += `</div>
+    <h2 style="font-size:17px">Leçons</h2>
+    <div class="carte"><span class="lab">Matières proposées dans la quête « Apprendre »</span><div class="puces">${Object.entries(MATIERES).map(([m, t]) =>
+      `<button class="puce ${p.matieres.includes(m) ? "on" : ""}" data-a="matiere" data-v="${m}" aria-pressed="${p.matieres.includes(m)}">${t}</button>`).join("")}</div>
+      <p class="note" style="margin:0">${LECONS.length} leçons écrites et un calcul mental renouvelé sans fin. Le nombre de leçons par jour se règle dans la quête « Apprendre ».</p></div>
+    <h2 style="font-size:17px">Règles du jeu</h2>
+    <div class="carte" style="gap:0">
+      <div class="reglage"><div class="t"><b>Jour réussi</b><span>Part minimale des quêtes à accomplir pour ne pas perdre de niveau</span></div>
+        <select id="seuil" aria-label="Jour réussi">${[[0.5, "50 %"], [0.7, "70 %"], [1, "100 %"]].map(([v, t]) => `<option value="${v}" ${p.seuil === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div class="reglage"><div class="t"><b>Perte de niveau</b><span>Quand la journée n'est pas réussie</span></div>
+        <select id="penalite" aria-label="Perte de niveau"><option value="rupture" ${p.penalite !== "jour" ? "selected" : ""}>Une fois par série rompue</option><option value="jour" ${p.penalite === "jour" ? "selected" : ""}>À chaque jour manqué</option></select></div>
+      <div class="reglage"><div class="t"><b>Début de la journée</b><span>Pour les couche-tard : une quête faite à 1 h compte pour la veille</span></div>
+        <select id="debut" aria-label="Début de la journée">${[0, 1, 2, 3, 4, 5].map(h => `<option value="${h}" ${p.debut === h ? "selected" : ""}>${h === 0 ? "Minuit" : h + " h"}</option>`).join("")}</select></div>
+      <div class="reglage"><div class="t"><b>Quête surprise</b><span>Une quête bonus différente chaque jour (ne compte pas pour le jour réussi)</span></div>${interrupteur("param-surprise", p.surprise, "Quête surprise")}</div>
+      <div class="reglage"><div class="t"><b>Sons</b><span>Carillon des quêtes et fin des minuteurs</span></div>${interrupteur("param-son", p.son, "Sons")}</div>
+    </div>
+    <h2 style="font-size:17px">Sauvegarde</h2>
+    <div class="carte">
+      <p class="note" style="margin:0">Tes données restent sur cet appareil. Exporte-les de temps en temps (et avant de changer de téléphone) pour ne rien perdre.</p>
+      <div class="rangee"><button class="btn" data-a="exporter">Exporter</button><label class="btn" for="fichier-import" style="display:inline-flex;align-items:center">Importer un fichier</label>
+        <input type="file" id="fichier-import" accept=".json,application/json" hidden></div>
+      ${SAUVEGARDE_TXT ? `<div class="champ"><span class="lab">Ta sauvegarde (à copier dans une note ou un e-mail)</span><code class="bloc-code" id="txt-sauvegarde">${esc(SAUVEGARDE_TXT)}</code>
+        <div class="rangee"><button class="btn" data-a="copier">Copier</button></div></div>` : ""}
+      <div class="champ"><label for="coller-import">…ou colle ici une sauvegarde</label><textarea id="coller-import" style="min-height:60px" placeholder="{&quot;v&quot;:2, …}"></textarea>
+        <div class="rangee"><button class="btn" data-a="importer-texte">Restaurer ce texte</button></div></div>
+      ${IMPORT_MSG ? `<p class="note" style="margin:0;color:var(--or)">${esc(IMPORT_MSG)}</p>` : ""}
+      ${CONFIRMER && CONFIRMER.type === "import" ? `<div class="rangee"><button class="btn danger" data-a="confirmer-import">Remplacer toutes mes données</button><button class="btn" data-a="annuler">Annuler</button></div>` : ""}
+    </div>
+    <h2 style="font-size:17px">Installer sur l'iPhone</h2>
+    <div class="carte note"><ol>
+      <li>Ouvre l'adresse de Mes Quêtes dans <b>Safari</b>.</li>
+      <li>Touche le bouton <b>Partager</b> (carré avec une flèche).</li>
+      <li>Choisis <b>« Sur l'écran d'accueil »</b>, puis <b>Ajouter</b>.</li></ol>
+      L'app s'ouvre alors en plein écran et fonctionne sans connexion.</div>
+    <div class="carte">
+      ${CONFIRMER && CONFIRMER.type === "reset" ? `<p class="note" style="margin:0">Tout effacer : niveau, historique, journal et quêtes personnalisées ?</p>
+        <div class="rangee"><button class="btn danger" data-a="confirmer-reset">Oui, tout effacer</button><button class="btn" data-a="annuler">Annuler</button></div>`
+      : `<button class="btn danger" data-a="reset">Recommencer à zéro</button>`}
+    </div>
+    <p class="note" style="text-align:center">Mes Quêtes 2.0</p>
+  </div>`;
+  return html;
+}
+
+// ------------------------------------------------------------------ éditeur de quête
+function ouvrirEditeur(id) {
+  const q = id ? queteId(id) : { id: "", nom: "", detail: "", cat: "savoir", xp: 30, type: "case", objectif: 10, unite: "min", pas: 5, jours: TOUS, moment: "journee", icone: "etoile", contenu: "", actif: true };
+  EDITION = JSON.parse(JSON.stringify(q));
+  EDITION.jours = EDITION.jours || TOUS;
+  EDITION.contenu = EDITION.contenu || "";
+  CONFIRMER = null;
+  rendre();
+}
+function rendreEditeur() {
+  const e = EDITION, imposeCompteur = e.contenu === "lecon" || e.contenu === "chapelet";
+  let ed = document.getElementById("editeur");
+  if (!ed) { ed = document.createElement("div"); ed.id = "editeur"; document.body.appendChild(ed); }
+  ed.innerHTML = `<div class="voile" data-a="fermer-editeur-fond"><div class="feuille gouttiere" role="dialog" aria-modal="true" aria-labelledby="titre-ed">
+    <h2 id="titre-ed">${e.id ? "Modifier la quête" : "Nouvelle quête"}</h2>
+    <div class="champ"><label for="ed-nom">Nom</label><input type="text" id="ed-nom" value="${esc(e.nom)}" maxlength="40" placeholder="Ex. : Lecture" autocomplete="off"></div>
+    <div class="champ"><label for="ed-detail">Précision</label><input type="text" id="ed-detail" value="${esc(e.detail)}" maxlength="60" placeholder="Ex. : 20 pages d'un roman" autocomplete="off"></div>
+    <div class="champ"><label for="ed-contenu">Proposition du jour</label><select id="ed-contenu">${Object.entries(CONTENUS).map(([v, t]) => `<option value="${v}" ${e.contenu === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+    <div class="champ"><span class="lab">Caractéristique</span><div class="puces">${Object.entries(CATS).map(([k, c]) =>
+      `<button class="puce ${e.cat === k ? "on" : ""}" data-a="ed-cat" data-v="${k}" aria-pressed="${e.cat === k}">${c.nom}</button>`).join("")}</div></div>
+    <div class="champ"><span class="lab">Récompense (60 XP et plus : quête rare, 80 et plus : épique)</span><div class="puces">${XP_CHOIX.map(x =>
+      `<button class="puce num ${e.xp === x ? "on" : ""}" data-a="ed-xp" data-v="${x}" aria-pressed="${e.xp === x}">+${x}</button>`).join("")}</div></div>
+    ${imposeCompteur ? `<div class="champ"><label for="ed-obj">${e.contenu === "lecon" ? "Leçons à réussir par jour" : "Dizaines par jour (5 = chapelet complet)"}</label>
+        <input type="number" id="ed-obj" min="1" max="${e.contenu === "lecon" ? 20 : 5}" value="${e.objectif || 1}" inputmode="numeric"></div>`
+      : `<div class="champ"><span class="lab">Type</span><div class="puces">
+      <button class="puce ${e.type === "case" ? "on" : ""}" data-a="ed-type" data-v="case" aria-pressed="${e.type === "case"}">À cocher</button>
+      <button class="puce ${e.type === "compteur" ? "on" : ""}" data-a="ed-type" data-v="compteur" aria-pressed="${e.type === "compteur"}">À compter (pages, minutes, verres…)</button></div></div>
+    ${e.type === "compteur" ? `<div class="deux"><div class="champ"><label for="ed-obj">Objectif</label><input type="number" id="ed-obj" min="1" max="10000" value="${e.objectif || 10}" inputmode="numeric"></div>
+      <div class="champ"><label for="ed-unite">Unité</label><input type="text" id="ed-unite" value="${esc(e.unite || "")}" maxlength="12" placeholder="pages"></div></div>
+      <div class="champ"><label for="ed-pas">Ajout à chaque appui</label><input type="number" id="ed-pas" min="1" max="1000" value="${e.pas || 1}" inputmode="numeric"></div>` : ""}`}
+    <div class="champ"><span class="lab">Jours</span><div class="puces">${JOURS_COURTS.map((x, i) =>
+      `<button class="puce ${e.jours.includes(i) ? "on" : ""}" data-a="ed-jour" data-v="${i}" aria-pressed="${e.jours.includes(i)}" aria-label="${JOURS_NOMS[i]}" style="min-width:40px">${x}</button>`).join("")}</div>
+      <div class="puces"><button class="lien-bouton" data-a="ed-jours" data-v="tous">Tous les jours</button><button class="lien-bouton" data-a="ed-jours" data-v="semaine">En semaine</button><button class="lien-bouton" data-a="ed-jours" data-v="weekend">Le week-end</button></div></div>
+    <div class="champ"><span class="lab">Moment</span><div class="puces">${Object.entries(MOMENTS).map(([k, t]) =>
+      `<button class="puce ${e.moment === k ? "on" : ""}" data-a="ed-moment" data-v="${k}" aria-pressed="${e.moment === k}">${t}</button>`).join("")}</div></div>
+    <div class="champ"><span class="lab">Icône</span><div class="grille-icones">${ICONES_QUETE.map(n =>
+      `<button class="${e.icone === n ? "on" : ""}" data-a="ed-icone" data-v="${n}" aria-label="Icône ${n.replace("_", " ")}" aria-pressed="${e.icone === n}">${ic(n, e.icone === n ? (CATS[e.cat] || CATS.savoir).c : "var(--doux)", 22)}</button>`).join("")}</div></div>
+    <p class="note" id="ed-erreur" style="margin:0;color:var(--rouge)" hidden></p>
+    <div class="rangee"><button class="btn-or" data-a="ed-enregistrer" style="flex:1">Enregistrer</button><button class="btn" data-a="fermer-editeur">Annuler</button></div>
+    ${e.id ? (CONFIRMER && CONFIRMER.type === "suppr" ? `<div class="rangee"><button class="btn danger" data-a="ed-supprimer-ok" style="flex:1">Supprimer définitivement</button><button class="btn" data-a="annuler-ed">Garder</button></div>`
+      : `<button class="btn danger" data-a="ed-supprimer">Supprimer cette quête</button>`) : ""}
+  </div></div>`;
+}
+function lireEditeur() {
+  const v = id => { const el = document.getElementById(id); return el ? el.value : null; };
+  if (v("ed-nom") != null) EDITION.nom = v("ed-nom");
+  if (v("ed-detail") != null) EDITION.detail = v("ed-detail");
+  if (v("ed-obj") != null) EDITION.objectif = Math.max(1, parseInt(v("ed-obj"), 10) || 1);
+  if (v("ed-unite") != null) EDITION.unite = v("ed-unite");
+  if (v("ed-pas") != null) EDITION.pas = Math.max(1, parseInt(v("ed-pas"), 10) || 1);
+  if (v("ed-contenu") != null) appliquerContenu(v("ed-contenu"));
+}
+function appliquerContenu(c) {
+  const e = EDITION;
+  if (c === e.contenu) return;
+  e.contenu = c;
+  if (c === "lecon") Object.assign(e, { type: "compteur", objectif: Math.min(e.objectif || 3, 20) || 3, unite: "leçons", pas: 1 });
+  if (c === "chapelet") Object.assign(e, { type: "compteur", objectif: 1, unite: "dizaine", pas: 1 });
+  if (c === "lecture" && e.type !== "compteur") Object.assign(e, { type: "compteur", objectif: 20, unite: "pages", pas: 5 });
+}
+function fermerEditeur() { EDITION = null; CONFIRMER = null; const ed = document.getElementById("editeur"); if (ed) ed.remove(); rendre(); }
+function enregistrerEditeur() {
+  lireEditeur();
+  const e = EDITION, err = document.getElementById("ed-erreur");
+  e.nom = (e.nom || "").trim();
+  if (!e.nom) { err.textContent = "Donne un nom à la quête."; err.hidden = false; return; }
+  if (!e.jours.length) { err.textContent = "Choisis au moins un jour."; err.hidden = false; return; }
+  if (e.contenu === "chapelet") e.objectif = Math.min(5, e.objectif || 1);
+  if (e.contenu === "chapelet") e.unite = e.objectif > 1 ? "dizaines" : "dizaine";
+  e.jours.sort();
+  if (e.id) { const i = S.quetes.findIndex(q => q.id === e.id); S.quetes[i] = e; }
+  else { e.id = "q" + Date.now().toString(36); S.quetes.push(e); }
+  sauver();
+  fermerEditeur();
+  toast("Quête enregistrée", e.nom);
+}
+
+// ------------------------------------------------------------------ sauvegarde
+function exporter() {
+  const texte = JSON.stringify(S);
+  SAUVEGARDE_TXT = texte;
+  try {
+    const url = URL.createObjectURL(new Blob([texte], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = "mes-quetes-" + aujourdhui() + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (e) { /* le texte reste affiché pour être copié */ }
+  rendre();
+}
+function preparerImport(texte) {
+  try {
+    const s = JSON.parse(texte);
+    if (!valide(s)) throw new Error();
+    CONFIRMER = { type: "import", donnees: completer(s) };
+    IMPORT_MSG = `Sauvegarde lue : ${Object.keys(s.jours).length} jour(s) d'historique, ${s.quetes.length} quête(s).`;
+  } catch (e) { CONFIRMER = null; IMPORT_MSG = "Ce texte n'est pas une sauvegarde de Mes Quêtes."; }
+  rendre();
+}
+
+// ------------------------------------------------------------------ événements
+document.addEventListener("click", ev => {
+  const el = ev.target.closest("[data-a]");
+  if (!el) return;
+  const a = el.dataset.a, id = el.dataset.id;
+  if (a === "fermer-editeur-fond") { if (ev.target === el) fermerEditeur(); return; }
+  if (a === "fermer-feuille-fond") { if (ev.target === el) fermerFeuille(); return; }
+  switch (a) {
+    case "vue": VUE = el.dataset.v; EDITION = null; CONFIRMER = null; IMPORT_MSG = ""; rendre(); scrollTo(0, 0); break;
+    case "basculer": basculer(id, ev); break;
+    case "plus": compter(id, 1, ev); break;
+    case "moins": compter(id, -1, ev); break;
+    case "basculer-jour": basculer(id, ev, JOUR_SEL); break;
+    case "ouvrir": ouvrirFeuille(id); break;
+    case "fermer-feuille": fermerFeuille(); break;
+    case "valider-feuille": { const j = jour(aujourdhui()); if (!j.gains[id]) basculer(id, ev); break; }
+    case "minuteur": lancerMinuteur(Number(el.dataset.s), el.dataset.l); break;
+    case "stop-minuteur": arreterMinuteur(); break;
+    case "tour": { const j = jour(aujourdhui()); j.seance = j.seance || {}; j.seance[el.dataset.c] = !j.seance[el.dataset.c]; sauver(); rendreFeuille(); break; }
+    case "lecon-suivante": nouvelleLecon(aujourdhui()); sauver(); rendreFeuille(); setTimeout(() => { const i = document.getElementById("reponse"); if (i) i.focus(); }, 50); break;
+    case "chapelet-debut": { const j = jour(aujourdhui()); j.chapelet = j.chapelet || { d: 0, ave: 0 }; j.chapelet.debut = true; sauver(); rendreFeuille(); break; }
+    case "ave": { const j = jour(aujourdhui()); j.chapelet = j.chapelet || { d: 0, ave: 0, debut: true }; if (j.chapelet.ave < 10) j.chapelet.ave++; if (j.chapelet.ave === 10) son("quete"); sauver(); rendreFeuille(); break; }
+    case "dizaine-finie": {
+      const j = jour(aujourdhui()), q = queteId(id);
+      memoriser();
+      j.q[id] = (Number(j.q[id]) || 0) + 1;
+      j.chapelet = { d: j.q[id], ave: 0, debut: true };
+      if (estFaite(q, j.q[id]) && !j.gains[id]) { gagner(j, id, q); flotte(ev, "+" + q.xp + " XP"); son("quete"); }
+      if (!j.liste.includes(id)) j.liste.push(id);
+      apres(); break;
+    }
+    case "surprise": surpriseFaite(ev); break;
+    case "changer-surprise": changerSurprise(); break;
+    case "coffre": ouvrirCoffre(); break;
+    case "fermer-celebration": el.closest(".celebration").remove(); break;
+    case "mois": { const [y, m] = MOIS_VU.split("-").map(Number); const d = new Date(y, m - 1 + Number(el.dataset.s), 1); MOIS_VU = iso(d).slice(0, 7); rendre(); break; }
+    case "jour": JOUR_SEL = el.dataset.k; rendre(); break;
+    case "humeur": case "energie": { const j = jour(JOUR_SEL); j[a] = j[a] === el.dataset.h ? "" : el.dataset.h; sauver(); rendre(); break; }
+    case "nouvelle": ouvrirEditeur(null); break;
+    case "modifier": ouvrirEditeur(id); break;
+    case "activer": { const q = queteId(id); q.actif = !q.actif; sauver(); rendre(); break; }
+    case "monter": { const i = Number(el.dataset.i); if (i > 0) { [S.quetes[i - 1], S.quetes[i]] = [S.quetes[i], S.quetes[i - 1]]; sauver(); rendre(); } break; }
+    case "matiere": { const m = el.dataset.v, ms = S.params.matieres; S.params.matieres = ms.includes(m) ? ms.filter(x => x !== m) : [...ms, m]; if (!S.params.matieres.length) S.params.matieres = [m]; sauver(); rendre(); break; }
+    case "param-surprise": S.params.surprise = !S.params.surprise; sauver(); rendre(); break;
+    case "param-son": S.params.son = !S.params.son; sauver(); rendre(); if (S.params.son) son("quete"); break;
+    case "exporter": exporter(); break;
+    case "copier": {
+      const repli = () => { const c = document.getElementById("txt-sauvegarde"); const r = document.createRange(); r.selectNodeContents(c); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Texte sélectionné", "Copie-le avec le menu de ton appareil."); };
+      try { navigator.clipboard.writeText(SAUVEGARDE_TXT).then(() => toast("Sauvegarde copiée", "Colle-la dans une note ou un e-mail."), repli); } catch (e) { repli(); }
+      break;
+    }
+    case "importer-texte": preparerImport(document.getElementById("coller-import").value); break;
+    case "confirmer-import": S = CONFIRMER.donnees; S.penalitesVues = Math.max(S.penalitesVues, stats().penalites.length); CONFIRMER = null; IMPORT_MSG = "Données restaurées."; SAUVEGARDE_TXT = ""; sauver(); rendre(); break;
+    case "reset": CONFIRMER = { type: "reset" }; rendre(); break;
+    case "confirmer-reset": S = etatInitial(); CONFIRMER = null; SAUVEGARDE_TXT = ""; IMPORT_MSG = ""; sauver(); VUE = "quetes"; rendre(); break;
+    case "annuler": CONFIRMER = null; IMPORT_MSG = ""; rendre(); break;
+    // éditeur
+    case "annuler-ed": CONFIRMER = null; rendreEditeur(); break;
+    case "ed-cat": lireEditeur(); EDITION.cat = el.dataset.v; rendreEditeur(); break;
+    case "ed-xp": lireEditeur(); EDITION.xp = Number(el.dataset.v); rendreEditeur(); break;
+    case "ed-type": lireEditeur(); EDITION.type = el.dataset.v; rendreEditeur(); break;
+    case "ed-moment": lireEditeur(); EDITION.moment = el.dataset.v; rendreEditeur(); break;
+    case "ed-icone": lireEditeur(); EDITION.icone = el.dataset.v; rendreEditeur(); break;
+    case "ed-jour": { lireEditeur(); const i = Number(el.dataset.v), js = EDITION.jours; EDITION.jours = js.includes(i) ? js.filter(x => x !== i) : [...js, i]; rendreEditeur(); break; }
+    case "ed-jours": lireEditeur(); EDITION.jours = { tous: TOUS.slice(), semaine: [0, 1, 2, 3, 4], weekend: [5, 6] }[el.dataset.v]; rendreEditeur(); break;
+    case "ed-enregistrer": enregistrerEditeur(); break;
+    case "fermer-editeur": fermerEditeur(); break;
+    case "ed-supprimer": lireEditeur(); CONFIRMER = { type: "suppr" }; rendreEditeur(); break;
+    case "ed-supprimer-ok": S.quetes = S.quetes.filter(q => q.id !== EDITION.id); sauver(); fermerEditeur(); break;
+  }
+});
+document.addEventListener("submit", ev => {
+  const f = ev.target;
+  if (f.dataset.form === "lecon") {
+    ev.preventDefault();
+    verifierLecon(f.dataset.id, document.getElementById("reponse").value, { target: f.querySelector("button") });
+    const i = document.getElementById("reponse");
+    if (i) i.focus();
+  }
+});
+document.addEventListener("input", ev => {
+  const t = ev.target;
+  if (t.id === "note-jour") { jour(t.dataset.k).note = t.value; sauver(); }
+  else if (t.id === "nom-heros") { S.nom = t.value.trim(); sauver(); }
+  else if (t.id === "reponse") { const j = jour(aujourdhui()); if (j.lecon) j.lecon.saisie = t.value; }
+});
+document.addEventListener("change", ev => {
+  const t = ev.target;
+  if (t.id === "seuil") { S.params.seuil = Number(t.value); sauver(); }
+  else if (t.id === "penalite") { S.params.penalite = t.value; sauver(); }
+  else if (t.id === "debut") { S.params.debut = Number(t.value); sauver(); }
+  else if (t.id === "ed-contenu") { lireEditeur(); rendreEditeur(); }
+  else if (t.id === "fichier-import" && t.files && t.files[0]) {
+    const r = new FileReader();
+    r.onload = () => preparerImport(String(r.result));
+    r.readAsText(t.files[0]);
+  }
+});
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") {
+    const c = document.querySelector(".celebration");
+    if (c) c.remove(); else if (EDITION) fermerEditeur(); else if (FEUILLE) fermerFeuille();
+  }
+});
+// changement de jour pendant que l'app est ouverte
+let dernierJour = aujourdhui();
+function verifierJour() { if (aujourdhui() !== dernierJour) { dernierJour = aujourdhui(); JOUR_SEL = null; MOIS_VU = null; if (FEUILLE) fermerFeuille(); rendre(); annoncerPenalites(); } }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) verifierJour(); });
+setInterval(verifierJour, 60000);
+
+// premier lancement : les jours passés avant l'installation ne comptent pas
+if (!S.penalitesVues) S.penalitesVues = 0;
+sauver();
+rendre();
+annoncerPenalites();
+if ("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && !/claude|anthropic/.test(location.hostname)) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+</script>
+</body>
+</html>
